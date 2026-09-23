@@ -1,86 +1,289 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 660" role="img" aria-label="make orchestrates subagents; dashed groups fan out to parallel runs and merge back">
-  <style>
-    .node { fill: #ffffff; stroke: #9ca3af; stroke-width: 1.2; }
-    .node-text { fill: #1f2937; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
-    .hub { fill: #f59e0b; stroke: #f59e0b; }
-    .hub-text { fill: #ffffff; font-weight: 600; }
-    .hub-sub { fill: #ffffff; opacity: 0.85; font-family: system-ui, -apple-system, sans-serif; font-size: 10px; }
-    .arrow { stroke: #6b7280; stroke-width: 1.5; fill: none; }
-    .feedback { stroke: #6b7280; stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; }
-    .arrowhead { fill: #6b7280; }
-    .group { fill: none; stroke: #6b7280; stroke-width: 1; stroke-dasharray: 5 4; opacity: 0.55; }
-    .label { fill: #6b7280; font-family: system-ui, -apple-system, sans-serif; font-size: 10px; }
-    @media (prefers-color-scheme: dark) {
-      .node { fill: #1f2937; stroke: #6b7280; }
-      .node-text { fill: #e5e7eb; }
-      .arrow { stroke: #9ca3af; }
-      .feedback { stroke: #9ca3af; }
-      .arrowhead { fill: #9ca3af; }
-      .group { stroke: #9ca3af; }
-      .label { fill: #9ca3af; }
-    }
-  </style>
-
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 1040 216"
+  width="1040"
+  height="216"
+  role="img"
+  aria-label="Six workflow stages left to right, subagents under each stage"
+>
   <defs>
-    <marker id="ah" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
-      <path d="M0,0 L0,6 L7,3 z" class="arrowhead" />
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15" />
+    </filter>
+    <marker
+      id="arrowhead"
+      markerWidth="12"
+      markerHeight="12"
+      refX="10"
+      refY="6"
+      orient="auto"
+      markerUnits="userSpaceOnUse"
+    >
+      <path d="M2,2 L2,10 L10,6 z" fill="#1F2937" />
     </marker>
   </defs>
 
-  <!-- orchestrator hub -->
-  <rect x="290" y="22" width="140" height="50" rx="10" class="node hub" />
-  <text x="360" y="45" text-anchor="middle" class="node-text hub-text">make</text>
-  <text x="360" y="62" text-anchor="middle" class="hub-sub">orchestrator</text>
+  <rect width="1040" height="216" fill="#FFF8F0" rx="20" />
 
-  <!-- fan-out to parallel group A -->
-  <path d="M360,72 V92" class="arrow" />
-  <path d="M360,92 H240 V139" class="arrow" marker-end="url(#ah)" />
-  <path d="M360,92 H480 V139" class="arrow" marker-end="url(#ah)" />
+  <rect
+    x="55"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#FF6B35"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="120"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#1F2937"
+  >
+    Clarify
+  </text>
+  <text
+    x="120"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#1F2937"
+  >
+    interviewer
+  </text>
+  <text
+    x="120"
+    y="142"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#1F2937"
+  >
+    researcher
+  </text>
 
-  <!-- group A: parallel -->
-  <rect x="110" y="120" width="500" height="88" rx="10" class="group" />
-  <text x="126" y="138" class="label">in parallel</text>
-  <rect x="150" y="146" width="180" height="48" rx="10" class="node" />
-  <text x="240" y="175" text-anchor="middle" class="node-text">interviewer</text>
-  <rect x="390" y="146" width="180" height="48" rx="10" class="node" />
-  <text x="480" y="175" text-anchor="middle" class="node-text">researcher</text>
+  <rect
+    x="215"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#17A2B8"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="280"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#FFFFFF"
+  >
+    Plan
+  </text>
+  <text
+    x="280"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#FFFFFF"
+  >
+    planner
+  </text>
+  <text
+    x="280"
+    y="142"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#FFFFFF"
+  >
+    plan-reviewer
+  </text>
 
-  <!-- group output: single port from the parallel container -->
-  <path d="M360,208 V245 H240 V261" class="arrow" marker-end="url(#ah)" />
+  <rect
+    x="375"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#7BC950"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="440"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#1F2937"
+  >
+    Build
+  </text>
+  <text
+    x="440"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#1F2937"
+  >
+    debugger · coder ×N
+  </text>
 
-  <!-- group B: sequential pair -->
-  <rect x="150" y="268" width="180" height="48" rx="10" class="node" />
-  <text x="240" y="297" text-anchor="middle" class="node-text">planner</text>
-  <rect x="390" y="268" width="180" height="48" rx="10" class="node" />
-  <text x="480" y="297" text-anchor="middle" class="node-text">plan-reviewer</text>
-  <path d="M330,292 H385" class="arrow" marker-end="url(#ah)" />
+  <rect
+    x="535"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#FFC107"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="600"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#1F2937"
+  >
+    Test
+  </text>
+  <text
+    x="600"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#1F2937"
+  >
+    tester
+  </text>
 
-  <!-- B into parallel group C -->
-  <path d="M480,316 V332 H360 V357" class="arrow" marker-end="url(#ah)" />
+  <rect
+    x="695"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#7E57C2"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="760"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#FFFFFF"
+  >
+    Review
+  </text>
+  <text
+    x="760"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#FFFFFF"
+  >
+    code-reviewer
+  </text>
 
-  <!-- group C: parallel coder deck -->
-  <rect x="110" y="348" width="500" height="92" rx="10" class="group" />
-  <text x="126" y="366" class="label">in parallel</text>
-  <rect x="306" y="364" width="180" height="48" rx="10" class="node" />
-  <rect x="294" y="376" width="180" height="48" rx="10" class="node" />
-  <rect x="282" y="388" width="180" height="48" rx="10" class="node" />
-  <text x="372" y="417" text-anchor="middle" class="node-text">coder</text>
-  <text x="502" y="417" class="label">×N · disjoint files</text>
+  <rect
+    x="855"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#EC4899"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="920"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#FFFFFF"
+  >
+    Document
+  </text>
+  <text
+    x="920"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#FFFFFF"
+  >
+    writer
+  </text>
 
-  <!-- C into tester -->
-  <path d="M372,440 V463" class="arrow" marker-end="url(#ah)" />
-  <rect x="292" y="470" width="160" height="48" rx="10" class="node" />
-  <text x="372" y="499" text-anchor="middle" class="node-text">tester</text>
-
-  <!-- tester into code-reviewer -->
-  <path d="M372,518 V533 H250 V541" class="arrow" marker-end="url(#ah)" />
-  <rect x="150" y="548" width="200" height="48" rx="10" class="node" />
-  <text x="250" y="577" text-anchor="middle" class="node-text">code-reviewer</text>
-  <path d="M350,572 H394" class="arrow" marker-end="url(#ah)" />
-  <rect x="400" y="548" width="160" height="48" rx="10" class="node" />
-  <text x="480" y="577" text-anchor="middle" class="node-text">writer</text>
-
-  <!-- feedback: code-reviewer back into the coder deck -->
-  <path d="M150,572 H100 V394 H275" class="feedback" marker-end="url(#ah)" />
-  <text x="92" y="483" text-anchor="middle" class="label" transform="rotate(-90 92 483)">on findings</text>
+  <path
+    d="M185,104 Q200,104 215,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
+  <path
+    d="M345,104 Q360,104 375,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
+  <path
+    d="M505,104 Q520,104 535,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
+  <path
+    d="M665,104 Q680,104 695,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
+  <path
+    d="M825,104 Q840,104 855,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
 </svg>

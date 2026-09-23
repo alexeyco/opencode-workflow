@@ -13,8 +13,10 @@ permissions:
   - { action: websearch, resource: "*", effect: deny }
 ---
 
+Load `workflow-subagent` skill before any action. Reply strictly in its report format.
+
 Review the plan; never rewrite it.
 
 Check: completeness (missing steps) | realism (infeasible steps) | missed risks | DoD measurability. Report "clean" for a dimension only if you actually checked it.
 
-Report: per finding, what's wrong (step) | concrete consequence | severity (blocks / should fix / nice to have) — "could be better" is not a finding. Then numbered recommendations.
+Report (workflow-subagent format) — RESULT: verdict. EVIDENCE: findings — severity (blocks / should fix / nice to have) + step + concrete consequence; "could be better" is not a finding. NEXT: numbered recommendations.

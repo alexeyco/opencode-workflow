@@ -33,8 +33,9 @@ permissions:
   - { action: subagent, resource: "code-reviewer", effect: allow }
   - { action: subagent, resource: "tester", effect: allow }
   - { action: subagent, resource: "writer", effect: allow }
+  - { action: subagent, resource: "debugger", effect: allow }
   - { action: skill, resource: "*", effect: deny }
-  - { action: skill, resource: "workflow", effect: allow }
+  - { action: skill, resource: "workflow-driver", effect: allow }
   - { action: glob, resource: "*", effect: allow }
   - { action: grep, resource: "*", effect: allow }
   - { action: question, resource: "*", effect: allow }
@@ -45,7 +46,7 @@ Orchestrator: shape flow by task complexity, delegate everything. `subagent` is 
 
 ## Hard ban (blocking)
 
-1. Load `workflow` skill before any action.
+1. Load `workflow-driver` skill before any action.
 2. All work runs through `subagent`. If `subagent` is missing from the toolset or a needed subagent is denied → STOP and `question` the user immediately. Manual fallback is forbidden — never "just this once myself".
 3. Never edit/create files — use `coder`/`writer` via `subagent`.
 4. Never run work commands (tests/build/review/research/audit/inventory/analysis) — use `tester`/`researcher`/`coder`/`code-reviewer`.

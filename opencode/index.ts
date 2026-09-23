@@ -1,5 +1,5 @@
-// OpenCode v2 plugin entry: registers 11 agents from bundled markdown
-// and the workflow skill.
+// OpenCode v2 plugin entry: registers 10 agents (1 primary + 9 subagents)
+// from bundled markdown and two skills: workflow-driver + workflow-subagent.
 
 import { readFileSync, readdirSync } from "node:fs";
 import * as path from "node:path";
@@ -13,9 +13,8 @@ import { composePermissions } from "./permissions.ts";
 
 const root = path.join(import.meta.dirname, "..");
 const agentsDir = path.join(root, "agents");
-const skillsDir = path.join(root, "skills", "workflow");
-
-const BUILTINS_TO_REMOVE = ["plan", "build"] as const;
+const skillsRoot = path.join(root, "skills");
+const SKILL_IDS = ["workflow-driver", "workflow-subagent"] as const;
 
 function readText(file: string): string {
   return readFileSync(file, "utf8");
@@ -47,15 +46,6 @@ export default Plugin.define({
     const agentAssets = loadAgentAssets();
 
     await ctx.agent.transform((editor) => {
-      for (const id of BUILTINS_TO_REMOVE) {
-        if (editor.get(id)) {
-          try {
-            editor.remove(id);
-          } catch {
-            // Never let a failed remove break plugin setup.
-          }
-        }
-      }
       for (const asset of agentAssets) {
         editor.update(asset.id, (agent) => {
           // Agent.Name.make casts the string to the branded type.
@@ -74,23 +64,24 @@ export default Plugin.define({
       }
     });
 
-    // ── Skill ───────────────────────────────────────────────────────────
-    const skillPath = path.join(skillsDir, "SKILL.md");
-    const skillRaw = readText(skillPath);
-    const { frontmatter: skillFm, body: skillBody } =
-      parseMarkdown<unknown>(skillRaw);
-    const skillDoc = validateSkillDoc(skillFm);
-
+    // ── Skills ──────────────────────────────────────────────────────────
     await ctx.skill.transform((editor) => {
-      editor.add(
-        Skill.Info.make({
-          id: Skill.ID.make("workflow"),
-          name: Skill.Name.make(skillDoc.name),
-          description: skillDoc.description,
-          path: skillPath as Skill.Info["path"],
-          content: skillBody,
-        }),
-      );
+      for (const id of SKILL_IDS) {
+        const skillPath = path.join(skillsRoot, id, "SKILL.md");
+        const skillRaw = readText(skillPath);
+        const { frontmatter: skillFm, body: skillBody } =
+          parseMarkdown<unknown>(skillRaw);
+        const skillDoc = validateSkillDoc(skillFm);
+        editor.add(
+          Skill.Info.make({
+            id: Skill.ID.make(id),
+            name: Skill.Name.make(skillDoc.name),
+            description: skillDoc.description,
+            path: skillPath as Skill.Info["path"],
+            content: skillBody,
+          }),
+        );
+      }
     });
 
     await ctx.skill.reload();

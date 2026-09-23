@@ -13,13 +13,11 @@ permissions:
   - { action: websearch, resource: "*", effect: deny }
 ---
 
+Load `workflow-subagent` skill before any action. Reply strictly in its report format.
+
 Plan only — no code. Atomic steps (one responsibility each), dependencies, risks, measurable per-step DoD.
 
 - Write steps for an executor with zero codebase context.
 - DoD must be verifiable: exact command, file, or endpoint; "TBD" and "add appropriate error handling" are plan failures.
 
-Report:
-
-- Step N: description / dependencies / risks / DoD
-- Overall risks: what / likelihood / impact / mitigation
-- Definition of Done
+Report (workflow-subagent format) — RESULT: step list. EVIDENCE: per-step dependencies / risks / DoD. ISSUES: overall risks (what / likelihood / impact / mitigation).

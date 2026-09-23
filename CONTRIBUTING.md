@@ -5,7 +5,7 @@
 - Never push to `master`.
 - Branch from `master`: `git checkout -b feat/<topic>`.
 - Commit messages: no conventional prefixes (`feat:`, `fix:`, …), past tense —
-  e.g. `Added workflow skill`, `Fixed permission composition order`.
+  e.g. `Added workflow-driver skill`, `Fixed permission composition order`.
 
 ## Development
 

@@ -116,9 +116,7 @@ function parseFrontmatter(text) {
 
 {
   const REQUIRED_IDS = [
-    "make",
-    "ask",
-    "YOLO",
+    "drive",
     "coder",
     "tester",
     "researcher",
@@ -127,8 +125,9 @@ function parseFrontmatter(text) {
     "code-reviewer",
     "interviewer",
     "writer",
+    "debugger",
   ];
-  const PRIMARIES = new Set(["make", "ask", "YOLO"]);
+  const PRIMARIES = new Set(["drive"]);
   const VALID_MODES = new Set(["primary", "subagent"]);
   const VALID_ACTIONS = new Set([
     "read",
@@ -205,19 +204,22 @@ function parseFrontmatter(text) {
 
         const skillRules = fm.permissions.filter((p) => p.action === "skill");
 
-        if (id === "make") {
+        if (id === "drive") {
           const hasDenyAll = skillRules.some(
             (p) => p.resource === "*" && p.effect === "deny",
           );
-          const hasAllowWorkflow = skillRules.some(
-            (p) => p.resource === "workflow" && p.effect === "allow",
+          const hasAllowWorkflowDriver = skillRules.some(
+            (p) => p.resource === "workflow-driver" && p.effect === "allow",
           );
-          if (!hasDenyAll) fail(`agents/make.md: must have {skill, *, deny}`);
-          if (!hasAllowWorkflow)
-            fail(`agents/make.md: must have {skill, workflow, allow}`);
+          if (!hasDenyAll)
+            fail(
+              `agents/drive.md: must have {skill, *, deny} (deny-all skills)`,
+            );
+          if (!hasAllowWorkflowDriver)
+            fail(`agents/drive.md: must have {skill, workflow-driver, allow}`);
           if (skillRules.length !== 2)
             fail(
-              `agents/make.md: must have exactly 2 skill rules, got ${skillRules.length}`,
+              `agents/drive.md: must have exactly 2 skill rules (deny-all + workflow-driver allow), got ${skillRules.length}`,
             );
         } else {
           const allowStar = skillRules.filter(
@@ -234,27 +236,109 @@ function parseFrontmatter(text) {
         }
       }
     }
+
+    // Each subagent body must reference the workflow-subagent skill
+    const SUBAGENTS = REQUIRED_IDS.filter((id) => !PRIMARIES.has(id));
+    const offenders = [];
+    for (const id of SUBAGENTS) {
+      const path = join(agentsDir, `${id}.md`);
+      const text = readText(path);
+      // Strip frontmatter before checking the body
+      const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
+      if (!body.includes("workflow-subagent")) {
+        offenders.push(id);
+      }
+    }
+    if (offenders.length > 0) {
+      fail(
+        `agents: subagent bodies must contain "workflow-subagent", offenders: ${offenders.join(", ")}`,
+      );
+    }
+
+    // drive.md must have subagent allow rules for exactly the 9 non-primary agents
+    const drivePath = join(agentsDir, "drive.md");
+    if (existsSync(drivePath)) {
+      const driveText = readText(drivePath);
+      const driveFm = parseFrontmatter(driveText);
+      if (driveFm && Array.isArray(driveFm.permissions)) {
+        const subagentRules = driveFm.permissions.filter(
+          (p) => p.action === "subagent",
+        );
+        const subagentAllows = subagentRules.filter(
+          (p) => p.effect === "allow",
+        );
+        const allowedIds = new Set(subagentAllows.map((p) => p.resource));
+        const expectedIds = new Set(
+          REQUIRED_IDS.filter((id) => !PRIMARIES.has(id)),
+        );
+
+        // Check for missing ids
+        const missing = [];
+        for (const id of expectedIds) {
+          if (!allowedIds.has(id)) missing.push(id);
+        }
+        if (missing.length > 0) {
+          fail(
+            `agents/drive.md: missing subagent allow rules for: ${missing.join(", ")}`,
+          );
+        }
+
+        // Check for extra ids (outside the expected set, excluding the deny-all rule)
+        const extra = [];
+        for (const id of allowedIds) {
+          if (!expectedIds.has(id)) extra.push(id);
+        }
+        if (extra.length > 0) {
+          fail(
+            `agents/drive.md: unexpected subagent allow rules for: ${extra.join(", ")}`,
+          );
+        }
+      }
+    }
   }
 }
 
-// ── 4. skills/workflow/SKILL.md ──────────────────────────────────────────────
+// ── 4. skills/ ───────────────────────────────────────────────────────────────
 
 {
-  const path = join(ROOT, "skills", "workflow", "SKILL.md");
-  if (!existsSync(path)) {
-    fail("skills/workflow/SKILL.md: file missing");
+  const SKILL_IDS = ["workflow-driver", "workflow-subagent"];
+  const skillsDir = join(ROOT, "skills");
+
+  if (!existsSync(skillsDir)) {
+    fail("skills/: directory missing");
   } else {
-    const text = readText(path);
-    const fm = parseFrontmatter(text);
-    if (!fm) {
-      fail("skills/workflow/SKILL.md: missing or invalid YAML frontmatter");
-    } else {
-      if (fm.name !== "workflow")
+    // Assert skills/ contains exactly the expected subdirectories
+    const actualDirs = readdirSync(skillsDir, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .sort();
+    const expectedDirs = [...SKILL_IDS].sort();
+    if (JSON.stringify(actualDirs) !== JSON.stringify(expectedDirs)) {
+      fail(
+        `skills/: expected directories [${expectedDirs.join(", ")}], got [${actualDirs.join(", ")}]`,
+      );
+    }
+
+    for (const id of SKILL_IDS) {
+      const path = join(skillsDir, id, "SKILL.md");
+      if (!existsSync(path)) {
+        fail(`skills/${id}/SKILL.md: file missing`);
+        continue;
+      }
+      const text = readText(path);
+      const fm = parseFrontmatter(text);
+      if (!fm) {
+        fail(`skills/${id}/SKILL.md: missing or invalid YAML frontmatter`);
+        continue;
+      }
+      if (fm.name !== id)
         fail(
-          `skills/workflow/SKILL.md: frontmatter name must be "workflow", got "${fm.name}"`,
+          `skills/${id}/SKILL.md: frontmatter name must be "${id}", got "${fm.name}"`,
         );
-      if (fm.description === undefined)
-        fail('skills/workflow/SKILL.md: frontmatter missing "description"');
+      if (typeof fm.description !== "string" || fm.description.length === 0)
+        fail(
+          `skills/${id}/SKILL.md: frontmatter description must be a non-empty string`,
+        );
     }
   }
 }

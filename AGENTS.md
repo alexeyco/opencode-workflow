@@ -1,7 +1,7 @@
 # @alexeyco/opencode-workflow
 
-OpenCode v2 plugin that registers 11 agents (3 primaries + 8 subagents)
-and the `workflow` routing skill.
+OpenCode v2 plugin that registers 10 agents (1 primary + 9 subagents)
+and the `workflow-driver` + `workflow-subagent` skills.
 Human-facing docs: [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Layout
@@ -10,11 +10,12 @@ Human-facing docs: [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md).
 opencode-workflow/
 ├── index.ts                    shim for local directory installs
 ├── opencode/
-│   ├── index.ts                plugin entry: agents + workflow skill
+│   ├── index.ts                plugin entry: agents + two skills
 │   ├── permissions.ts          composePermissions (defaults → plugin → user)
 │   └── markdown.ts             frontmatter parsing/validation
-├── agents/                     11 agent definitions (3 primary + 8 subagent)
-├── skills/workflow/SKILL.md    orchestration skill loaded by make
+├── agents/                     10 agent definitions (1 primary + 9 subagent)
+├── skills/workflow-driver/SKILL.md    orchestration router loaded by drive
+├── skills/workflow-subagent/SKILL.md  universal subagent contract + report format
 ├── docs/                       agents.md catalog · skills.md tuning · gallery/ diagrams
 ├── scripts/check.mjs           sanity checks behind make check
 ├── tests/                      unit tests (node --test)

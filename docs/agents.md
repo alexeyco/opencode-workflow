@@ -1,7 +1,7 @@
 # Agent catalog
 
-Eleven agents ship with the plugin: 3 primaries (`make`, `ask`, `YOLO`)
-and 8 subagents. Each is a markdown file under [`agents/`](../agents) —
+Ten agents ship with the plugin: 1 primary (`drive`) and 9
+subagents. Each is a markdown file under [`agents/`](../agents) —
 YAML frontmatter (`description`, `mode`, optional `color`, permission
 rules) plus a body that becomes the agent's system prompt.
 
@@ -11,31 +11,28 @@ Two properties hold across the whole catalog:
   opencode default model. Pin deliberately — see
   [Model guidance](#model-guidance).
 - **Least privilege, ordered rules, last match wins.** Permissions are
-  array-style `{ action, resource, effect }` rules; `resource` supports
-  glob patterns (`sudo *`, `**>[^&]**`). opencode evaluates the composed
-  list with `Array.prototype.findLast` semantics — the **last matching
-  rule decides**. The plugin composes
-  defaults → plugin rules → your config rules
-  ([`opencode/permissions.ts`](../opencode/permissions.ts)), so a rule
-  you add in `opencode.jsonc` always beats the plugin's. Ordering inside
-  each agent's frontmatter matters for the same reason: trailing
-  guardrails (`deny`, `ask`) override earlier permissive rules.
+  array-style `{ action, resource, effect }` rules with glob
+  `resource` patterns, composed defaults → plugin rules → your config
+  rules ([`opencode/permissions.ts`](../opencode/permissions.ts)), so
+  your `opencode.jsonc` always beats the plugin's — see
+  [composition order](skills.md#composition-order--why-your-rules-win);
+  trailing `deny`/`ask` guardrails in each frontmatter rely on the same
+  semantics.
 
 ## Overview
 
-| Agent           | Mode     | Role (frontmatter description)                                                              |
-| --------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `make`          | primary  | Workflow orchestrator. Delegates all work to subagents in parallel waves by task necessity. |
-| `ask`           | primary  | Answer questions only. No code, no edits, no state changes.                                 |
-| `YOLO`          | primary  | Full-access executor. Does exactly what you say — directly, no delegation, no restrictions. |
-| `coder`         | subagent | Implement plan steps (backend/frontend) via TDD.                                            |
-| `tester`        | subagent | QA gate: tests, lint, smoke. Reports with evidence; never fixes.                            |
-| `researcher`    | subagent | Research external docs, APIs and prior art. Read-only, returns findings with sources.       |
-| `planner`       | subagent | Decompose task into steps, dependencies, risks; produce plan with DoD.                      |
-| `plan-reviewer` | subagent | Review plan for completeness, realism, risks. Findings only.                                |
-| `code-reviewer` | subagent | Read-only code review: quality, bugs, security. Findings with severity.                     |
-| `interviewer`   | subagent | Clarify requirements and uncover implicit needs via questions.                              |
-| `writer`        | subagent | Write and update docs: README, docs/, AGENTS.md.                                            |
+| Agent           | Mode     | Role (frontmatter description)                                                                                     |
+| --------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `drive`         | primary  | Workflow orchestrator. Delegates all work to subagents in parallel waves by task necessity.                        |
+| `coder`         | subagent | Implement plan steps (backend/frontend) via TDD.                                                                   |
+| `tester`        | subagent | QA gate: tests, lint, smoke. Reports with evidence; never fixes.                                                   |
+| `debugger`      | subagent | Reproduce and root-cause defects: repro, minimize, locate (file:line). Never fixes — hands the diagnosis to coder. |
+| `researcher`    | subagent | Research external docs, APIs and prior art. Read-only, returns findings with sources.                              |
+| `planner`       | subagent | Decompose task into steps, dependencies, risks; produce plan with DoD.                                             |
+| `plan-reviewer` | subagent | Review plan for completeness, realism, risks. Findings only.                                                       |
+| `code-reviewer` | subagent | Read-only code review: quality, bugs, security. Findings with severity.                                            |
+| `interviewer`   | subagent | Clarify requirements and uncover implicit needs via questions.                                                     |
+| `writer`        | subagent | Write and update docs: README, docs/, AGENTS.md.                                                                   |
 
 ## Effective permission posture
 
@@ -43,33 +40,30 @@ Summaries below reflect the actual frontmatter; the raw rule lists are
 in each `agents/<id>.md`. `—` means no explicit rule — the built-in
 `{ action: "*", resource: "*", effect: "allow" }` default applies.
 
-| Agent           | Read | Edit | Shell                                | Subagents     | Skill           | Web              |
-| --------------- | ---- | ---- | ------------------------------------ | ------------- | --------------- | ---------------- |
-| `make`          | ✓    | ✗    | ask-by-default + narrow allowlist    | 8 allowlisted | `workflow` only | fetch ✓          |
-| `ask`           | ✓    | ✗    | ask-by-default + read-only allowlist | ✗             | all             | fetch ✓          |
-| `YOLO`          | —    | ✓    | open, no guardrails                  | ✗             | all             | —                |
-| `coder`         | ✓    | ✓    | open + guardrails                    | ✗             | all             | ✗ fetch + search |
-| `tester`        | ✓    | ✗    | open + guardrails + redirect deny    | ✗             | all             | ✗ fetch + search |
-| `researcher`    | ✓    | ✗    | denied                               | ✗             | all             | fetch ✓          |
-| `planner`       | ✓    | ✗    | denied                               | ✗             | all             | ✗ fetch + search |
-| `plan-reviewer` | ✓    | ✗    | denied                               | ✗             | all             | ✗ fetch + search |
-| `code-reviewer` | ✓    | ✗    | denied                               | ✗             | all             | ✗ fetch + search |
-| `interviewer`   | ✓    | ✗    | denied                               | ✗             | all             | ✗ fetch + search |
-| `writer`        | ✓    | ✓    | ask-by-default + docs allowlist      | ✗             | all             | fetch ✓          |
+| Agent           | Read | Edit | Shell                             | Subagents     | Skill                  | Web              |
+| --------------- | ---- | ---- | --------------------------------- | ------------- | ---------------------- | ---------------- |
+| `drive`         | ✓    | ✗    | ask-by-default + narrow allowlist | 9 allowlisted | `workflow-driver` only | fetch ✓          |
+| `coder`         | ✓    | ✓    | open + guardrails                 | ✗             | all                    | ✗ fetch + search |
+| `tester`        | ✓    | ✗    | open + guardrails + redirect deny | ✗             | all                    | ✗ fetch + search |
+| `debugger`      | ✓    | ✗    | allowlist + guardrails            | ✗             | all                    | ✗ fetch + search |
+| `researcher`    | ✓    | ✗    | denied                            | ✗             | all                    | fetch ✓          |
+| `planner`       | ✓    | ✗    | denied                            | ✗             | all                    | ✗ fetch + search |
+| `plan-reviewer` | ✓    | ✗    | denied                            | ✗             | all                    | ✗ fetch + search |
+| `code-reviewer` | ✓    | ✗    | denied                            | ✗             | all                    | ✗ fetch + search |
+| `interviewer`   | ✓    | ✗    | denied                            | ✗             | all                    | ✗ fetch + search |
+| `writer`        | ✓    | ✓    | ask-by-default + docs allowlist   | ✗             | all                    | fetch ✓          |
 
 All agents share `glob` ✓ and `grep` ✓ (explicit or via default);
-`question` ✓ is explicit on `make`, `ask` and `interviewer`. Only the
-six agents marked `✗ fetch + search` deny `websearch` explicitly;
+`question` ✓ is explicit on `drive` and `interviewer` only. Only the
+seven agents marked `✗ fetch + search` deny `websearch` explicitly;
 everywhere else it falls through to the default allow.
 
-### Primaries
+### The `drive` orchestrator
 
-Primaries carry a `color:` in frontmatter: `make` amber `#f59e0b`,
-`ask` emerald `#34d399`, `YOLO` red `#ef4444`. Subagents ship unclored.
+The only primary the plugin registers; it carries a `color:` of amber
+`#f59e0b`. Subagents ship unclored.
 
-#### `make` — orchestrator
-
-The largest rule set (36 rules), engineered around one principle: _the
+The largest rule set, engineered around one principle: _the
 orchestrator has no hands of its own; `subagent` is the only way to
 work._
 
@@ -81,31 +75,16 @@ work._
   safe git (`git status*`, `git diff*`, `git log*`, `git branch*`,
   `git checkout*`, `git worktree*`), and quality gates (`make smoke*`,
   `make fmt*`). Everything else asks.
-- **Subagent allowlist — exactly the 8 bundled subagents:**
+- **Subagent allowlist — exactly the 9 bundled subagents:**
   `interviewer`, `researcher`, `planner`, `plan-reviewer`, `coder`,
-  `code-reviewer`, `tester`, `writer`. Everything else (including
-  `YOLO`) is denied.
-- **Skill: `workflow` only** — the orchestrator loads the routing skill
-  first and must not freelance with others (see
-  [docs/skills.md](skills.md)).
+  `code-reviewer`, `tester`, `debugger`, `writer`. Everything else is
+  denied.
+- **Skill: `workflow-driver` only**; every subagent must run under
+  `workflow-subagent` — skill defaults and the report format are
+  specified in [docs/skills.md](skills.md#default-state).
 - **Guardrails:** redirect `**>[^&]**` deny, `sudo *` deny,
   `rm -rf /**` deny, `git push *` ask.
 - `question` ✓, `webfetch` ✓.
-
-#### `ask` — read-only Q&A
-
-Same shape as `make` minus delegation: `edit` ✗, `subagent` ✗. Shell is
-ask-by-default with a read-only inspection allowlist (`ls*`, `cat*`,
-`head*`, `tail*`, `wc*`, probing commands, `grep*`, `rg*`, `find*`, safe
-git). Same guardrails. Skill access: all.
-
-#### `YOLO` — unrestricted executor
-
-The only agent with an open posture — 4 rules total: `edit` ✓, `shell` ✓
-(no guardrails), `skill` ✓, and the sole structural rule:
-`subagent` ✗. No delegating; it does everything itself, without
-confirmations. Everything unmentioned (read, web, glob, grep) falls
-through to the default allow.
 
 ### Subagents
 
@@ -123,6 +102,18 @@ through to the default allow.
   (inspection, safe git, `make fmt*`, `prettier*`) and full guardrails
   including redirect deny. `webfetch` ✓ for reference material.
 
+**Shell-capable non-editors** — may run commands to gather evidence,
+but never modify anything:
+
+- `debugger` — diagnosis role: `reproduce → minimize → root-cause` with
+  `file:line` evidence. `drive` routes it when a defect needs a
+  reproduction and a root cause before anyone can fix it; the finished
+  diagnosis is handed to `coder`, because `debugger` never fixes — that
+  is its contract. Permissions mirror `tester` minus the freedom: shell
+  is an allowlist (build/test runners needed to reproduce, plus
+  inspection and safe git) with the standard trailing guardrails,
+  `edit` ✗, `subagent` ✗, webfetch/websearch ✗.
+
 **Read-only analysts** — `read`/`glob`/`grep` ✓, `edit` ✗, `shell` ✗,
 `subagent` ✗; they differ only in what they may add:
 
@@ -132,31 +123,34 @@ through to the default allow.
 - `interviewer` — offline, but `question` ✓ (requirements elicitation
   is conversation).
 
-All eight subagents share: `subagent` ✗ (no recursive delegation) and
-`skill` all-access.
+All nine subagents share: `subagent` ✗ (no recursive delegation) and
+`skill` all-access with `workflow-subagent` required before any action —
+see [docs/skills.md](skills.md#default-state).
 
 ### Shared guardrail matrix
 
-| Guardrail                  | Pattern            | Effect | Agents                                     |
-| -------------------------- | ------------------ | ------ | ------------------------------------------ |
-| No output redirection      | `**>[^&]**`        | deny   | `make`, `ask`, `tester`, `writer`          |
-| No privilege escalation    | `sudo *`           | deny   | `make`, `ask`, `coder`, `tester`, `writer` |
-| No destructive `rm`        | `rm -rf /**`       | deny   | `make`, `ask`, `coder`, `tester`, `writer` |
-| Push needs human approval  | `git push *`       | ask    | `make`, `ask`, `coder`, `tester`, `writer` |
-| Dotenv reads need approval | `*.env`, `*.env.*` | ask    | all — from the built-in defaults           |
+| Guardrail                  | Pattern            | Effect | Agents                                           |
+| -------------------------- | ------------------ | ------ | ------------------------------------------------ |
+| No output redirection      | `**>[^&]**`        | deny   | `drive`, `debugger`, `tester`, `writer`          |
+| No privilege escalation    | `sudo *`           | deny   | `drive`, `coder`, `tester`, `debugger`, `writer` |
+| No destructive `rm`        | `rm -rf /**`       | deny   | `drive`, `coder`, `tester`, `debugger`, `writer` |
+| Push needs human approval  | `git push *`       | ask    | `drive`, `coder`, `tester`, `debugger`, `writer` |
+| Dotenv reads need approval | `*.env`, `*.env.*` | ask    | all — from the built-in defaults                 |
 
-`YOLO` deliberately has none of the shell guardrails; that is its
-contract.
+The rows above list exactly which agents carry each rule in their
+frontmatter: shell-capable agents need these trailing guardrails —
+`coder` ships without the redirect deny — while the read-only analysts
+deny `shell` outright, so the command guardrails are moot for them.
 
 ## Model guidance
 
 Agents ship unpinned. Sensible classes when you pin per role:
 
-| Class           | Agents                                   |
-| --------------- | ---------------------------------------- |
-| Heavy reasoning | `make`, `plan-reviewer`, `code-reviewer` |
-| Balanced        | `coder`, `researcher`, `planner`         |
-| Fast            | `ask`, `tester`, `interviewer`, `writer` |
+| Class           | Agents                                                |
+| --------------- | ----------------------------------------------------- |
+| Heavy reasoning | `drive`, `plan-reviewer`, `code-reviewer`, `debugger` |
+| Balanced        | `coder`, `researcher`, `planner`                      |
+| Fast            | `tester`, `interviewer`, `writer`                     |
 
 Pinning is a plain opencode config, e.g.:
 
@@ -171,9 +165,11 @@ Pinning is a plain opencode config, e.g.:
 
 ## Built-in `plan` / `build` agents
 
-The plugin removes the stock `plan` and `build` agents at startup — one
-orchestrator (`make`) to rule them all. Fallback if you ever want the
-same effect without the plugin:
+The plugin leaves the stock agents untouched: `plan` and `build` stay
+exactly as stock OpenCode ships them and coexist with `drive` (the
+`general` / `explore` subagents were never modified either). If you
+want `plan` and `build` gone, disable them yourself — the plugin no
+longer does it for you:
 
 ```jsonc
 // opencode.jsonc

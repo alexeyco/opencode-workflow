@@ -3,56 +3,49 @@
 How opencode discovers skills, what this plugin does with them by
 default, and how to tune access per agent.
 
-## How opencode discovers skills
-
-A skill is a folder with a `SKILL.md` (`name` + `description`
-frontmatter, folder name = skill name). opencode scans these locations:
-
-| Source                | Path                                                              |
-| --------------------- | ----------------------------------------------------------------- |
-| Global config         | `~/.config/opencode/skills/<name>/SKILL.md`                       |
-| Project config        | `.opencode/skills/<name>/SKILL.md`                                |
-| Global Claude-compat  | `~/.claude/skills/<name>/SKILL.md`                                |
-| Project Claude-compat | `.claude/skills/<name>/SKILL.md`                                  |
-| Global agents-compat  | `~/.agents/skills/<name>/SKILL.md`                                |
-| Project agents-compat | `.agents/skills/<name>/SKILL.md`                                  |
-| Config entries        | `skills` key in `opencode.jsonc` — paths or URLs to skill folders |
-
-For project paths opencode walks up from the working directory to the
-git worktree root, collecting every match. Discovered skills are listed
-in the `skill` tool; the agent loads one on demand.
-
 ## What this plugin ships
 
-The plugin registers **one** skill itself: `workflow`
-([`skills/workflow/SKILL.md`](../skills/workflow/SKILL.md)), the
-orchestration router. It does **not** bundle companion skills and does
-not restrict what you install — discovery is yours.
+The plugin registers **two** skills itself:
+
+- `workflow-driver`
+  ([`skills/workflow-driver/SKILL.md`](../skills/workflow-driver/SKILL.md)) —
+  the orchestration router that `drive` loads to delegate work.
+- `workflow-subagent` ([`skills/workflow-subagent/SKILL.md`](../skills/workflow-subagent/SKILL.md)) —
+  the universal subagent contract: English reasoning for token economy,
+  strict brevity, and the one JSON report format every subagent returns
+  (defined by the skill itself; per-agent payload guidance lives in each
+  [`agents/<id>.md`](../agents)).
+
+It does **not** bundle companion skills and does not restrict what you
+install — discovery is yours.
 
 The default rule per agent, straight from the frontmatter:
 
-- All agents except `make`:
+- All nine subagents:
 
   ```yaml
   - { action: skill, resource: "*", effect: allow }
   ```
 
-  → every agent sees **whatever is installed** in your environment.
+  → every subagent sees **whatever is installed** in your environment —
+  and `workflow-subagent` is contractually mandatory: each subagent's
+  prompt hard-requires loading it before any action and replying in its
+  report format (per-agent payload guidance in each `agents/<id>.md`).
 
-- `make` is workflow-only by design — the orchestrator must load the
-  routing skill first and never freelance with others:
+- `drive` is `workflow-driver`-only by design — the orchestrator must
+  load the routing skill first and never freelance with others:
 
   ```yaml
   - { action: skill, resource: "*", effect: deny }
-  - { action: skill, resource: "workflow", effect: allow }
+  - { action: skill, resource: "workflow-driver", effect: allow }
   ```
 
 ### Default state
 
-| Agent                                                                                                                | Skill access         |
-| -------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `make`                                                                                                               | `workflow` only      |
-| `ask`, `YOLO`, `coder`, `tester`, `researcher`, `planner`, `plan-reviewer`, `code-reviewer`, `interviewer`, `writer` | all installed skills |
+| Agent                                                                                                             | Skill access           |
+| ----------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `drive`                                                                                                           | `workflow-driver` only |
+| `coder`, `tester`, `debugger`, `researcher`, `planner`, `plan-reviewer`, `code-reviewer`, `interviewer`, `writer` | all installed skills   |
 
 ## Tuning via `opencode.jsonc`
 
@@ -91,9 +84,10 @@ segment 3 always beats segment 2, which beats segment 1. Composition is
 idempotent: rules identical to a plugin rule or a default are not
 appended twice.
 
-### Recipe — restrict `coder` to two skills
+### Recipe — restrict `coder` to two companion skills
 
-Deny everything, then re-allow (the README's canonical example):
+Deny everything, then re-allow — the kept set **must include
+`workflow-subagent`**, shown second below:
 
 ```jsonc
 // opencode.jsonc
@@ -102,6 +96,11 @@ Deny everything, then re-allow (the README's canonical example):
     "coder": {
       "permissions": [
         { "action": "skill", "resource": "*", "effect": "deny" },
+        {
+          "action": "skill",
+          "resource": "workflow-subagent",
+          "effect": "allow",
+        },
         {
           "action": "skill",
           "resource": "test-driven-development",
@@ -150,19 +149,19 @@ the plugin's catch-all allow, rather than being silently overridden.
 Two caveats keep per-agent overrides the recommended route: the tail
 segment keeps the order opencode resolved, so how global and per-agent
 rules interleave is host-determined; and a global rule also hits
-primaries — including `make`, whose skill surface you may want to keep
+primaries — including `drive`, whose skill surface you may want to keep
 deliberately curated. Prefer explicit per-agent rules.
 
-### Recipe — give `make` extra skills
+### Recipe — give `drive` extra skills
 
-Append an allow; it sits in the tail, so `findLast` beats `make`'s
+Append an allow; it sits in the tail, so `findLast` beats `drive`'s
 `{ skill, *, deny }`:
 
 ```jsonc
 // opencode.jsonc
 {
   "agents": {
-    "make": {
+    "drive": {
       "permissions": [
         { "action": "skill", "resource": "grilling", "effect": "allow" },
       ],
@@ -171,15 +170,23 @@ Append an allow; it sits in the tail, so `findLast` beats `make`'s
 }
 ```
 
-Symmetrically, `{ "action": "skill", "resource": "workflow", "effect": "deny" }`
-would take `workflow` away from `make` — the plugin's routing then
-depends entirely on `make`'s system prompt. Not recommended.
+Symmetrically, `{ "action": "skill", "resource": "workflow-driver", "effect": "deny" }`
+would take `workflow-driver` away from `drive` — the plugin's routing then
+depends entirely on `drive`'s system prompt. Not recommended.
+
+> [!WARNING]
+> Whenever you override the available skills of **any** agent, keep
+> `workflow-driver` allowed on `drive` and `workflow-subagent` allowed
+> on every subagent — these two skills carry the plugin's methodology
+> (routing and the unified report format), and overriding them away
+> breaks it.
 
 ## Companion skills
 
-The `workflow` methodology is designed to pair with these skills when
-they are installed in your environment — they are **not bundled**, and
-steps degrade gracefully when one is missing:
+The `workflow-driver` methodology is designed to pair with these skills
+when they are installed in your environment — they are **not bundled**,
+and steps degrade gracefully when one is missing. Every role below
+still runs under the bundled `workflow-subagent` contract:
 
 | Skill                     | Reinforces step | Purpose                             |
 | ------------------------- | --------------- | ----------------------------------- |
@@ -187,6 +194,7 @@ steps degrade gracefully when one is missing:
 | `writing-plans`           | planner         | plan structure and DoD discipline   |
 | `test-driven-development` | coder           | tests-before-code workflow          |
 | `caveman-review`          | code-reviewer   | blunt, high-signal diff review      |
+| `systematic-debugging`    | debugger        | disciplined reproduce → root-cause  |
 | `docmap`                  | writer          | README / AGENTS.md / docs blueprint |
 
 They come from your own skill directories (`~/.config/opencode/skills`,
@@ -196,9 +204,10 @@ pick them up automatically.
 
 ## Troubleshooting
 
-- **Skill not visible** → check the discovery table above: is it
-  `SKILL.md` (all caps) with valid `name`/`description` frontmatter, in
-  a folder matching the skill name, unique across all locations?
+- **Skill not visible** → is it `SKILL.md` (all caps) with valid
+  `name`/`description` frontmatter, in a folder matching the skill name,
+  in one of the [opencode discovery
+  locations](https://opencode.ai/docs/skills)?
 - **`permission denied` on load** → remember last-match-wins: your rule
   only beats a plugin rule if it is in the config tail (it always is for
   `agents.<id>.permissions`), and a broader later rule can undo a

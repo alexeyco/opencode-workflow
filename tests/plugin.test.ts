@@ -30,9 +30,7 @@ function resolvePermission(
 
 // Expected agent IDs
 const EXPECTED_AGENTS = [
-  "make",
-  "ask",
-  "YOLO",
+  "drive",
   "coder",
   "tester",
   "researcher",
@@ -41,9 +39,10 @@ const EXPECTED_AGENTS = [
   "code-reviewer",
   "interviewer",
   "writer",
+  "debugger",
 ];
 
-const PRIMARIES = new Set(["make", "ask", "YOLO"]);
+const PRIMARIES = new Set(["drive"]);
 
 // Fake agent editor backed by Map
 class FakeAgentEditor {
@@ -138,8 +137,9 @@ function createFakeContext(preseedAgents: string[] = ["plan", "build"]) {
   return { ctx, agentEditor, skillEditor, getReloadCalled: () => reloadCalled };
 }
 
-test("plugin: setup registers 11 agents with correct modes", async () => {
-  const { ctx, agentEditor } = createFakeContext();
+test("plugin: registers 10 agents with correct modes", async () => {
+  // Use empty pre-seed so total count equals exactly the 10 plugin agents.
+  const { ctx, agentEditor } = createFakeContext([]);
   await plugin.setup(ctx as any);
 
   const agents = agentEditor.list();
@@ -157,7 +157,7 @@ test("plugin: setup registers 11 agents with correct modes", async () => {
 });
 
 test("plugin: primaries have colors", async () => {
-  const { ctx, agentEditor } = createFakeContext();
+  const { ctx, agentEditor } = createFakeContext([]);
   await plugin.setup(ctx as any);
 
   for (const id of PRIMARIES) {
@@ -166,16 +166,16 @@ test("plugin: primaries have colors", async () => {
   }
 });
 
-test("plugin: plan and build are removed", async () => {
+test("plugin: builtins untouched: plan/build remain after setup", async () => {
   const { ctx, agentEditor } = createFakeContext(["plan", "build"]);
   await plugin.setup(ctx as any);
 
-  assert.equal(agentEditor.get("plan"), undefined);
-  assert.equal(agentEditor.get("build"), undefined);
+  assert.ok(agentEditor.get("plan"), "plan builtin should remain");
+  assert.ok(agentEditor.get("build"), "build builtin should remain");
 });
 
-test("plugin: remove() of missing id does not throw", async () => {
-  const { ctx } = createFakeContext([]); // No plan/build pre-seeded
+test("plugin: setup does not reject with empty pre-seed", async () => {
+  const { ctx } = createFakeContext([]);
   await assert.doesNotReject(async () => {
     await plugin.setup(ctx as any);
   });
@@ -211,19 +211,25 @@ test("plugin: permissions include defaults + agent rules + user overrides", asyn
   });
 });
 
-test("plugin: workflow skill registered", async () => {
-  const { ctx, skillEditor, getReloadCalled } = createFakeContext();
+test("plugin: two workflow skills registered", async () => {
+  const { ctx, skillEditor, getReloadCalled } = createFakeContext([]);
   await plugin.setup(ctx as any);
 
   const skills = skillEditor.list();
-  assert.equal(skills.length, 1);
+  assert.equal(skills.length, 2);
 
-  const skill = skills[0];
-  assert.equal(skill.id, "workflow");
-  assert.equal(skill.name, "workflow");
-  assert.ok(skill.description.length > 0);
-  assert.ok(skill.content.length > 0);
-  assert.ok(skill.path.endsWith("skills/workflow/SKILL.md"));
+  const expectedIds = ["workflow-driver", "workflow-subagent"];
+  for (const id of expectedIds) {
+    const skill = skills.find((s: any) => s.id === id);
+    assert.ok(skill, `skill ${id} should be registered`);
+    assert.equal(skill.name, id, `${id}: name must match id (frontmatter)`);
+    assert.ok(skill.description.length > 0, `${id} should have description`);
+    assert.ok(skill.content.length > 0, `${id} should have content`);
+    assert.ok(
+      skill.path.endsWith(`skills/${id}/SKILL.md`),
+      `${id}: path must end with skills/${id}/SKILL.md`,
+    );
+  }
   assert.ok(getReloadCalled());
 });
 
@@ -246,12 +252,12 @@ test("plugin: idempotent across multiple runs", async () => {
   }
 });
 
-test("plugin: make's composed rules resolve correctly", async () => {
-  const { ctx, agentEditor } = createFakeContext();
+test("plugin: drive's composed rules resolve correctly", async () => {
+  const { ctx, agentEditor } = createFakeContext([]);
   await plugin.setup(ctx as any);
 
-  const make = agentEditor.get("make")!;
-  const perms = make.permissions;
+  const drive = agentEditor.get("drive")!;
+  const perms = drive.permissions;
 
   // shell "ls x" should ask (matches {shell, *, ask})
   assert.equal(resolvePermission(perms, "shell", "ls x"), "ask");
@@ -259,9 +265,10 @@ test("plugin: make's composed rules resolve correctly", async () => {
   // shell "sudo rm x" should deny (matches {shell, "sudo *", deny})
   assert.equal(resolvePermission(perms, "shell", "sudo rm x"), "deny");
 
-  // skill "workflow" should allow
-  assert.equal(resolvePermission(perms, "skill", "workflow"), "allow");
+  // drive carries {skill, *, deny} then {skill, workflow-driver, allow}:
+  // workflow-driver resolves to allow (the later, specific rule wins via findLast)
+  assert.equal(resolvePermission(perms, "skill", "workflow-driver"), "allow");
 
-  // skill "other" should deny (make has {skill, *, deny})
-  assert.equal(resolvePermission(perms, "skill", "other"), "deny");
+  // any other skill resolves to deny (the deny-all rule matches; no later allow overrides it)
+  assert.equal(resolvePermission(perms, "skill", "some-other-skill"), "deny");
 });

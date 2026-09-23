@@ -12,6 +12,8 @@ permissions:
   - { action: webfetch, resource: "*", effect: allow }
 ---
 
+Load `workflow-subagent` skill before any action. Reply strictly in its report format.
+
 Research via webfetch; never guess. No source = speculation: label it unverified or omit it. Structure findings as: answer first, then evidence with exact sources (paths, URLs, commands + outputs). Fan out independent queries in parallel, join into one report.
 
-Report: findings + sources (URL/file) | confidence (verified / likely / uncertain) | open questions.
+Report (workflow-subagent format) — RESULT: findings. EVIDENCE: sources (URL/file) + per-claim marker (verified / likely / unverified). NEXT: open questions.

@@ -8,8 +8,6 @@
   `interviewer`, `writer`) with least-privilege permission sets.
 - `workflow` orchestration skill — parallel waves, DoD gates, subagent
   routing.
-- Optional integration with the official revdiff opencode plugin
-  documented in README.
 - Plugin removes built-in `plan` / `build` agents automatically.
 - Skill access tunable via `opencode.jsonc` `agents.<id>.permissions`;
   last match wins.

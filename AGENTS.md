@@ -6,20 +6,20 @@ Human-facing docs: [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Layout
 
-- `index.ts` — shim for local directory installs (host probes `<dir>/index.ts`);
-  npm installs resolve via `package.json` `exports`.
-- `opencode/index.ts` — plugin entry; registers agents and the `workflow`
-  skill with OpenCode v2 (`@opencode/plugin`).
-- `opencode/permissions.ts` — `composePermissions`; merges defaults → plugin
-  rules → user rules, last match wins.
-- `agents/*.md` — 11 agent definitions (no `model:` pins, array-style
-  permissions with v2 action vocabulary).
-- `skills/workflow/SKILL.md` — orchestration skill loaded by `make`.
-- `scripts/check.mjs` — sanity checks behind `make check`; same checks run
-  in CI.
-- `tests/` — test suite, run by `make check`.
-- `docs/` — `agents.md` (full catalog + permission tables) and `skills.md`
-  (skill-access tuning deep-dive).
+```
+opencode-workflow/
+├── index.ts                    shim for local directory installs
+├── opencode/
+│   ├── index.ts                plugin entry: agents + workflow skill
+│   ├── permissions.ts          composePermissions (defaults → plugin → user)
+│   └── markdown.ts             frontmatter parsing/validation
+├── agents/                     11 agent definitions (3 primary + 8 subagent)
+├── skills/workflow/SKILL.md    orchestration skill loaded by make
+├── docs/                       agents.md catalog · skills.md tuning · gallery/ diagrams
+├── scripts/check.mjs           sanity checks behind make check
+├── tests/                      unit tests (node --test)
+├── Makefile · package.json · tsconfig.json · .github/
+```
 
 ## Conventions
 

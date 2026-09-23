@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440">
+  <style>
+    .node { fill: #ffffff; stroke: #e5e7eb; stroke-width: 1.5; }
+    .node-text { fill: #1f2937; font-family: system-ui, -apple-system, sans-serif; font-size: 13px; }
+    .hub { fill: #f59e0b; stroke: #f59e0b; }
+    .hub-text { fill: #ffffff; font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 600; }
+    .arrow { stroke: #6b7280; stroke-width: 1.5; fill: none; }
+    .arrowhead { fill: #6b7280; }
+    .label { fill: #6b7280; font-family: system-ui, -apple-system, sans-serif; font-size: 11px; }
+    .caption { fill: #6b7280; font-family: system-ui, -apple-system, sans-serif; font-size: 12px; font-style: italic; }
+    
+    @media (prefers-color-scheme: dark) {
+      .node { fill: #1f2937; stroke: #374151; }
+      .node-text { fill: #e5e7eb; }
+      .hub { fill: #f59e0b; stroke: #f59e0b; }
+      .hub-text { fill: #ffffff; }
+      .arrow { stroke: #9ca3af; }
+      .arrowhead { fill: #9ca3af; }
+      .label { fill: #9ca3af; }
+      .caption { fill: #9ca3af; }
+    }
+  </style>
+  
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" class="arrowhead" />
+    </marker>
+  </defs>
+  
+  <!-- Hub -->
+  <rect x="295" y="25" width="130" height="36" rx="8" class="node hub" />
+  <text x="360" y="48" text-anchor="middle" class="node-text hub-text">make</text>
+  
+  <!-- Wave 1 -->
+  <text x="60" y="126" class="label">Wave 1</text>
+  <rect x="220" y="105" width="120" height="32" rx="6" class="node" />
+  <text x="280" y="126" text-anchor="middle" class="node-text">interviewer</text>
+  <rect x="380" y="105" width="120" height="32" rx="6" class="node" />
+  <text x="440" y="126" text-anchor="middle" class="node-text">researcher</text>
+  
+  <!-- Arrow from make to wave 1 -->
+  <line x1="360" y1="61" x2="360" y2="105" class="arrow" marker-end="url(#arrowhead)" />
+  
+  <!-- Wave 2 -->
+  <text x="60" y="196" class="label">Wave 2</text>
+  <rect x="220" y="175" width="120" height="32" rx="6" class="node" />
+  <text x="280" y="196" text-anchor="middle" class="node-text">planner</text>
+  <rect x="380" y="175" width="120" height="32" rx="6" class="node" />
+  <text x="440" y="196" text-anchor="middle" class="node-text">plan-reviewer</text>
+  
+  <!-- Arrow wave 1 to wave 2 -->
+  <line x1="360" y1="137" x2="360" y2="175" class="arrow" marker-end="url(#arrowhead)" />
+  
+  <!-- Arrow planner to plan-reviewer -->
+  <line x1="340" y1="191" x2="380" y2="191" class="arrow" marker-end="url(#arrowhead)" />
+  
+  <!-- Wave 3 -->
+  <text x="60" y="266" class="label">Wave 3</text>
+  <rect x="160" y="245" width="120" height="32" rx="6" class="node" />
+  <text x="220" y="266" text-anchor="middle" class="node-text">coder</text>
+  <rect x="290" y="245" width="120" height="32" rx="6" class="node" />
+  <text x="350" y="266" text-anchor="middle" class="node-text">coder</text>
+  <rect x="420" y="245" width="120" height="32" rx="6" class="node" />
+  <text x="480" y="266" text-anchor="middle" class="node-text">coder</text>
+  <text x="550" y="266" class="label">×N</text>
+  
+  <!-- Arrow wave 2 to wave 3 -->
+  <line x1="360" y1="207" x2="360" y2="245" class="arrow" marker-end="url(#arrowhead)" />
+  
+  <!-- Wave 4 -->
+  <text x="60" y="336" class="label">Wave 4</text>
+  <rect x="300" y="315" width="120" height="32" rx="6" class="node" />
+  <text x="360" y="336" text-anchor="middle" class="node-text">tester</text>
+  
+  <!-- Arrow wave 3 to wave 4 -->
+  <line x1="360" y1="277" x2="360" y2="315" class="arrow" marker-end="url(#arrowhead)" />
+  
+  <!-- Wave 5 -->
+  <text x="60" y="406" class="label">Wave 5</text>
+  <rect x="220" y="385" width="120" height="32" rx="6" class="node" />
+  <text x="280" y="406" text-anchor="middle" class="node-text">code-reviewer</text>
+  <rect x="380" y="385" width="120" height="32" rx="6" class="node" />
+  <text x="440" y="406" text-anchor="middle" class="node-text">writer</text>
+  
+  <!-- Arrow wave 4 to wave 5 -->
+  <line x1="360" y1="347" x2="360" y2="385" class="arrow" marker-end="url(#arrowhead)" />
+  
+  <!-- Arrow code-reviewer to writer -->
+  <line x1="340" y1="401" x2="380" y2="401" class="arrow" marker-end="url(#arrowhead)" />
+  
+  <!-- Side note -->
+  <text x="620" y="48" class="label">ask · YOLO</text>
+  <text x="620" y="63" class="label">direct work</text>
+  
+  <!-- Caption -->
+  <text x="360" y="435" text-anchor="middle" class="caption">waves, not chains — every gate is a DoD</text>
+</svg>

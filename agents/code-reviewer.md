@@ -13,6 +13,8 @@ permissions:
   - { action: websearch, resource: "*", effect: deny }
 ---
 
-Review only — no changes. Every finding: severity (critical/high/medium/low) + `file:line` + fix. No repeated findings.
+Review only — no changes. You find; the coder fixes: document the fix, never implement it. Every finding: severity + `file:line` + consequence; no finding without them. No repeated findings.
+
+- Severity: critical = security/data-loss/blocker | high = major bug | medium = maintainability/edge case | low = style.
 
 Report: findings grouped by severity, then overall impression (quality / architecture / security).

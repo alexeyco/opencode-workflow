@@ -1,6 +1,6 @@
 ---
 name: workflow
-description: "Dynamic workflow router for multi-agent tasks. Includes each step by necessity: grilling, writing-plans, test-driven-development, caveman-review, docmap."
+description: "Dynamic workflow router for multi-agent tasks. Includes each step only when necessary."
 ---
 
 # Workflow
@@ -12,7 +12,7 @@ No fixed tiers: include a step only when it is necessary, skip otherwise.
 Every step below executes as a `subagent` call to its subagent — the orchestrator never performs a step itself: no inline research, audits, inventory, analysis, or reading sources "just to check".
 
 - `subagent` missing from the toolset, or a required subagent denied → stop immediately and `question` the user. There is no manual fallback mode.
-- Orchestrator-side `read`/`glob`/`grep`/`list` exist only for delegation context and DoD verification of subagent reports.
+- Orchestrator-side `read`/`glob`/`grep` exist only for delegation context and DoD verification of subagent reports.
 - Shell is only for env probes (`which*`, `type*`, `command*`, `pwd*`, `date*`, `echo*`), `git status|diff|log|branch|checkout|worktree` and `make smoke|fmt` gates — never for inspection or work commands.
 
 | Step          | Necessary when                                                                                                            |

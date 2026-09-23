@@ -177,9 +177,9 @@ depends entirely on `make`'s system prompt. Not recommended.
 
 ## Companion skills
 
-The `workflow` skill references these by name and uses them only when
-present — they are **not bundled**, and steps degrade gracefully when a
-skill is missing:
+The `workflow` methodology is designed to pair with these skills when
+they are installed in your environment — they are **not bundled**, and
+steps degrade gracefully when one is missing:
 
 | Skill                     | Reinforces step | Purpose                             |
 | ------------------------- | --------------- | ----------------------------------- |

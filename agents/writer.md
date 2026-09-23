@@ -39,4 +39,7 @@ permissions:
 
 Clear, structured docs with examples and file/function refs. Run `make fmt` after edits.
 
+- Identify audience and their goal first; write for them, not for yourself.
+- Verify before writing: examples run where runnable, refs match the code, paths exist — outdated docs are worse than none.
+
 Report: updated files + what changed | related refs | `make fmt` exit code.

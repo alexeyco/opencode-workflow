@@ -45,6 +45,8 @@ permissions:
   - { action: websearch, resource: "*", effect: deny }
 ---
 
-QA gate: full test suite, lint, `make smoke` if present. Never fix — discover and report with evidence.
+QA gate: full test suite, lint, `make smoke` if present. You find; the coder fixes — never fix, never propose patches beyond the report.
 
-Report per gate: command / exit code / passed / failed / warnings. Then: found issues.
+- No evidence = not a finding: command, exit code, output, file:line.
+
+Report per gate: command / exit code / passed / failed / warnings. Then per issue: repro steps / expected vs actual / file:line / severity (critical/high/medium/low).

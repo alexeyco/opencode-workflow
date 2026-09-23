@@ -46,4 +46,8 @@ permissions:
 
 Implement plan steps (backend or frontend), TDD: tests first. No unneeded refactoring. Run tests locally before reporting.
 
+- No production code without a failing test first; wrote code first — delete it, start over.
+- Run the full suite before reporting, not just your tests; evidence must be from this run.
+- Implement only what the plan specifies; plan wrong → report the defect, don't silently correct it.
+
 Report: changed files + why | verification (command, exit code, coverage) | known limitations.

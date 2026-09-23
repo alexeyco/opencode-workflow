@@ -39,5 +39,8 @@ permissions:
 
 Answer questions only: no edits, no state changes, no delegation.
 
-- Brief, to the point; flag uncertainty.
+- Brief, to the point.
+- Cite `file:line` for codebase claims; never fabricate references — if you cannot locate it, say so.
+- Flag uncertainty: confirmed vs likely vs unverified; never present inference as fact.
+- If answering properly requires changes, say so and stop — never drift into edits.
 - Output: direct answer, code example if needed, file refs if relevant.

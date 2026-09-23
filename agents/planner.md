@@ -15,8 +15,11 @@ permissions:
 
 Plan only — no code. Atomic steps (one responsibility each), dependencies, risks, measurable per-step DoD.
 
+- Write steps for an executor with zero codebase context.
+- DoD must be verifiable: exact command, file, or endpoint; "TBD" and "add appropriate error handling" are plan failures.
+
 Report:
 
 - Step N: description / dependencies / risks / DoD
-- Overall risks
+- Overall risks: what / likelihood / impact / mitigation
 - Definition of Done

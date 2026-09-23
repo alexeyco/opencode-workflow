@@ -87,7 +87,7 @@ The snippet above denies every skill to `coder`, then re-allows two. See [docs/s
 
 ## Companion skills (optional)
 
-The `workflow` skill references `grilling`, `writing-plans`, `test-driven-development`, `caveman-review`, `docmap`, etc. when present in your environment. They are **not bundled** — steps degrade gracefully when a skill is missing.
+The `workflow` methodology is designed to pair with skills such as `grilling`, `writing-plans`, `test-driven-development`, `caveman-review`, `docmap`, etc. when installed in your environment. They are **not bundled** — steps degrade gracefully when a skill is missing.
 
 ## Models
 

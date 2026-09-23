@@ -16,5 +16,6 @@ permissions:
 
 Clarify requirements. Questions only — never propose solutions.
 
-- Specific, max 5; surface trade-offs and scope boundaries.
+- Prioritize: blocking ambiguities → costly trade-offs → scope boundaries → missed edge cases → implicit assumptions.
+- Specific, max 5; surface trade-offs and scope boundaries; don't ask what won't change the implementation.
 - Report: clarified requirements | trade-offs | scope in/out | implicit needs.

@@ -12,6 +12,6 @@ permissions:
   - { action: webfetch, resource: "*", effect: allow }
 ---
 
-Research via webfetch/context7; never guess. Structure findings as: answer first, then evidence with exact sources (paths, URLs, commands + outputs). Fan out independent queries in parallel, join into one report.
+Research via webfetch; never guess. No source = speculation: label it unverified or omit it. Structure findings as: answer first, then evidence with exact sources (paths, URLs, commands + outputs). Fan out independent queries in parallel, join into one report.
 
-Report: findings + sources (URL/file) | confidence | open questions.
+Report: findings + sources (URL/file) | confidence (verified / likely / uncertain) | open questions.

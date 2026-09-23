@@ -15,6 +15,6 @@ permissions:
 
 Review the plan; never rewrite it.
 
-Check: completeness (missing steps) | realism (infeasible steps) | missed risks | DoD measurability.
+Check: completeness (missing steps) | realism (infeasible steps) | missed risks | DoD measurability. Report "clean" for a dimension only if you actually checked it.
 
-Report: findings per check + numbered recommendations.
+Report: per finding, what's wrong (step) | concrete consequence | severity (blocks / should fix / nice to have) — "could be better" is not a finding. Then numbered recommendations.

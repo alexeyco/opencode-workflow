@@ -3,7 +3,7 @@
 A complete multi-agent engineering team for OpenCode v2 — orchestrator, 8 specialized subagents, 2 utility primaries, and the `workflow` routing skill — in one plugin.
 
 <p align="center">
-  <img src="docs/gallery/workflow.svg" alt="Workflow orchestration diagram" width="720">
+  <img src="docs/gallery/workflow.svg" alt="make orchestrates subagents; dashed groups fan out into parallel runs and merge back" width="640">
 </p>
 
 ## Why

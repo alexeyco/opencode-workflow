@@ -1,0 +1,289 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 1040 216"
+  width="1040"
+  height="216"
+  role="img"
+  aria-label="Six workflow stages left to right, subagents under each stage"
+>
+  <defs>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15" />
+    </filter>
+    <marker
+      id="arrowhead"
+      markerWidth="12"
+      markerHeight="12"
+      refX="10"
+      refY="6"
+      orient="auto"
+      markerUnits="userSpaceOnUse"
+    >
+      <path d="M2,2 L2,10 L10,6 z" fill="#1F2937" />
+    </marker>
+  </defs>
+
+  <rect width="1040" height="216" fill="#FFF8F0" rx="20" />
+
+  <rect
+    x="55"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#FF6B35"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="120"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#1F2937"
+  >
+    Clarify
+  </text>
+  <text
+    x="120"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#1F2937"
+  >
+    interviewer
+  </text>
+  <text
+    x="120"
+    y="142"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#1F2937"
+  >
+    researcher
+  </text>
+
+  <rect
+    x="215"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#17A2B8"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="280"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#FFFFFF"
+  >
+    Plan
+  </text>
+  <text
+    x="280"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#FFFFFF"
+  >
+    planner
+  </text>
+  <text
+    x="280"
+    y="142"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#FFFFFF"
+  >
+    plan-reviewer
+  </text>
+
+  <rect
+    x="375"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#7BC950"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="440"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#1F2937"
+  >
+    Build
+  </text>
+  <text
+    x="440"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#1F2937"
+  >
+    debugger · coder ×N
+  </text>
+
+  <rect
+    x="535"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#FFC107"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="600"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#1F2937"
+  >
+    Test
+  </text>
+  <text
+    x="600"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#1F2937"
+  >
+    tester
+  </text>
+
+  <rect
+    x="695"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#7E57C2"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="760"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#FFFFFF"
+  >
+    Review
+  </text>
+  <text
+    x="760"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#FFFFFF"
+  >
+    code-reviewer
+  </text>
+
+  <rect
+    x="855"
+    y="28"
+    width="130"
+    height="160"
+    rx="14"
+    fill="#EC4899"
+    stroke="#1F2937"
+    stroke-width="3"
+    filter="url(#shadow)"
+  />
+  <text
+    x="920"
+    y="104"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="15"
+    fill="#FFFFFF"
+  >
+    Document
+  </text>
+  <text
+    x="920"
+    y="126"
+    text-anchor="middle"
+    font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
+    font-weight="600"
+    font-size="10.5"
+    fill="#FFFFFF"
+  >
+    writer
+  </text>
+
+  <path
+    d="M185,104 Q200,104 215,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
+  <path
+    d="M345,104 Q360,104 375,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
+  <path
+    d="M505,104 Q520,104 535,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
+  <path
+    d="M665,104 Q680,104 695,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
+  <path
+    d="M825,104 Q840,104 855,104"
+    stroke="#1F2937"
+    stroke-width="4"
+    fill="none"
+    marker-end="url(#arrowhead)"
+  />
+</svg>

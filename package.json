@@ -1,0 +1,50 @@
+{
+  "name": "@alexeyco/opencode-workflow",
+  "version": "0.1.0",
+  "description": "Multi-agent workflow toolkit for OpenCode: 10 role-tuned agents, the workflow-driver and workflow-subagent skills, and permission composition that keeps your overrides winning",
+  "keywords": [
+    "agents",
+    "code-review",
+    "opencode",
+    "opencode-plugin",
+    "orchestration",
+    "skills",
+    "workflow",
+    "workflow-driver",
+    "workflow-subagent"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./opencode/index.ts"
+  },
+  "files": [
+    "agents",
+    "opencode",
+    "skills",
+    "docs",
+    "index.ts",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opencode/plugin": "^2.0.14",
+    "yaml": "^2"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5.8.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexeyco/opencode-workflow.git"
+  },
+  "engines": {
+    "node": ">=22.18"
+  }
+}

@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import {
   parseMarkdown,
   validateAgentDoc,
-  validateCommandDoc,
   validateSkillDoc,
 } from "../opencode/markdown.ts";
 
@@ -117,19 +116,6 @@ test("validateAgentDoc: invalid mode throws", () => {
 test("validateAgentDoc: non-object throws", () => {
   assert.throws(() => validateAgentDoc("string"), /must be an object/);
   assert.throws(() => validateAgentDoc(null), /must be an object/);
-});
-
-test("validateCommandDoc: valid doc round-trips", () => {
-  const input = { description: "Test command" };
-  const doc = validateCommandDoc(input);
-  assert.equal(doc.description, "Test command");
-});
-
-test("validateCommandDoc: missing description throws", () => {
-  assert.throws(
-    () => validateCommandDoc({}),
-    /frontmatter missing string 'description'/,
-  );
 });
 
 test("validateSkillDoc: valid doc round-trips", () => {

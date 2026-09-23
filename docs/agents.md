@@ -189,4 +189,4 @@ same effect without the plugin:
 
 - [README — Tuning subagent skill access](../README.md#tuning-subagent-skill-access)
 - [docs/skills.md](skills.md) — skill-access tuning deep-dive.
-- [README](../README.md) — install, `/revdiff`, usage.
+- [README](../README.md) — install, usage.

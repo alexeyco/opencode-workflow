@@ -1,14 +1,13 @@
 {
   "name": "@alexeyco/opencode-workflow",
   "version": "0.1.0",
-  "description": "Multi-agent workflow toolkit for OpenCode: 11 agents, /revdiff review loop, workflow skill",
+  "description": "Multi-agent workflow toolkit for OpenCode: 11 role-tuned agents, the workflow routing skill, and permission composition that keeps your overrides winning",
   "keywords": [
     "agents",
     "code-review",
     "opencode",
     "opencode-plugin",
     "orchestration",
-    "revdiff",
     "skills",
     "workflow"
   ],
@@ -19,10 +18,8 @@
   },
   "files": [
     "agents",
-    "commands",
     "opencode",
     "skills",
-    "tools",
     "index.ts",
     "README.md",
     "CHANGELOG.md",

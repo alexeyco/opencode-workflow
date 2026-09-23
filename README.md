@@ -1,12 +1,12 @@
 # @alexeyco/opencode-workflow
 
-A complete multi-agent engineering team for OpenCode — orchestrator, 8 specialized subagents, 2 utility primaries, the `workflow` routing skill, and the `/revdiff` interactive review loop — in one plugin.
+A complete multi-agent engineering team for OpenCode — orchestrator, 8 specialized subagents, 2 utility primaries, and the `workflow` routing skill — in one plugin.
 
 ## Why
 
 - **Delegation-first orchestration.** `make` breaks work into parallel waves, gates each wave on a Definition-of-Done, and never falls back to "do it yourself" — subagents own the work end-to-end.
 - **11 role-tuned agents, role-scoped permission sets.** Each agent ships with the narrowest permission set it needs; no agent gets more than its role requires.
-- **Interactive terminal review via `/revdiff`.** Annotate diffs in tmux / Zellij / kitty / iTerm2 / wezterm / ghostty / … and the agent fixes every remark — no copy-paste, no context switching.
+- **Interactive terminal review via the official revdiff plugin.** Annotate diffs in your terminal and the agent fixes every remark — see [revdiff integration](#revdiff-integration-optional) below.
 - **Skills stay yours.** Agents see every skill installed in your environment; tune access per agent from `opencode.jsonc`.
 - **Kills the stock `plan` / `build` agents.** One orchestrator to rule them all.
 
@@ -35,25 +35,37 @@ A complete multi-agent engineering team for OpenCode — orchestrator, 8 special
 
 OpenCode v2 native key is `plugins`; opencode installs the npm package automatically. Then restart opencode and switch the primary agent to `make`.
 
-## `/revdiff` dependencies
+## revdiff integration (optional)
 
-`/revdiff` requires the `revdiff` CLI in `PATH`:
+For interactive terminal diff review, install the official upstream revdiff opencode plugin — it provides a `revdiff` custom tool and `/revdiff` command with **no shell-tool timeout** (the bundled launcher was capped at 120 s).
 
 ```sh
-brew install umputun/apps/revdiff     # macOS / Linux
-paru -S revdiff                       # AUR
-go install github.com/umputun/revdiff/app/revdiff@latest
+opencode plugin add github.com/umputun/revdiff/plugins/opencode
+# or run setup.sh from the repo root
 ```
 
-See [umputun/revdiff](https://github.com/umputun/revdiff). The overlay requires one of: tmux, Zellij, herdr, kitty, wezterm, cmux, ghostty, iTerm2, Emacs vterm, agterm.
+See [umputun/revdiff](https://github.com/umputun/revdiff) (`plugins/opencode/`, `setup.sh`). The overlay requires one of: tmux, Zellij, herdr, kitty, wezterm, cmux, ghostty, iTerm2, Emacs vterm, agterm.
 
-> **Note:** if you also use upstream revdiff's own opencode plugin, the `/revdiff` command names collide — use one or the other.
+To let `make` call the `revdiff` tool without a permission prompt, allow the `revdiff` action in `opencode.jsonc`:
+
+```jsonc
+{
+  "agents": {
+    "make": {
+      "permissions": [
+        { "action": "revdiff", "resource": "*", "effect": "allow" },
+      ],
+    },
+  },
+}
+```
+
+User rules are applied after plugin rules (last match wins), so this override takes effect; YOLO already allows everything. Annotations arrive in the current agent's session and `make` delegates fixes per the workflow skill.
 
 ## Usage
 
-- `/revdiff` on a dirty branch → overlay review → agent fixes every annotation.
-- `/revdiff` on a clean branch → `gitleaks` + full-tree review.
 - Talk to `make` in natural language — it routes work through subagents per the `workflow` skill.
+- With the revdiff plugin installed: `/revdiff` on a dirty branch → overlay review → agent fixes every annotation; on a clean branch → `gitleaks` + full-tree review.
 
 ## Tuning subagent skill access
 
@@ -115,7 +127,7 @@ The plugin removes them automatically. Config fallback if you ever need it witho
 
 ## Adopting the plugin
 
-If you previously kept hand-written copies of these agents / commands / skills in `~/.config/opencode`, remove the duplicates (`agents/*.md`, `commands/revdiff.md`, `skills/workflow`) to avoid double registration.
+If you previously kept hand-written copies of these agents / skills in `~/.config/opencode`, remove the duplicates (`agents/*.md`, `skills/workflow`) to avoid double registration.
 
 ## Requirements
 

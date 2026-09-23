@@ -1,11 +1,4 @@
-import {
-  readFileSync,
-  readdirSync,
-  statSync,
-  existsSync,
-  accessSync,
-  constants,
-} from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, extname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
@@ -28,10 +21,6 @@ function parseFrontmatter(text) {
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return null;
   return YAML.parse(match[1]);
-}
-
-function bodyAfterFrontmatter(text) {
-  return text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
 }
 
 // ── 1. package.json ──────────────────────────────────────────────────────────
@@ -71,9 +60,7 @@ function bodyAfterFrontmatter(text) {
       "index.ts",
       "opencode",
       "agents",
-      "commands",
       "skills",
-      "tools",
       "README.md",
       "CHANGELOG.md",
       "LICENSE",
@@ -250,34 +237,7 @@ function bodyAfterFrontmatter(text) {
   }
 }
 
-// ── 4. commands/revdiff.md ───────────────────────────────────────────────────
-
-{
-  const path = join(ROOT, "commands", "revdiff.md");
-  if (!existsSync(path)) {
-    fail("commands/revdiff.md: file missing");
-  } else {
-    const text = readText(path);
-    const fm = parseFrontmatter(text);
-    if (!fm) {
-      fail("commands/revdiff.md: missing or invalid YAML frontmatter");
-    } else if (fm.description === undefined) {
-      fail('commands/revdiff.md: frontmatter missing "description"');
-    }
-
-    const body = bodyAfterFrontmatter(text);
-    const launcherCount = (body.match(/\{\{REVDIFF_LAUNCHER\}\}/g) || [])
-      .length;
-    if (launcherCount !== 1)
-      fail(
-        `commands/revdiff.md: body must contain {{REVDIFF_LAUNCHER}} exactly once, found ${launcherCount}`,
-      );
-    if (body.includes("~/.config/revdiff"))
-      fail("commands/revdiff.md: body must not contain ~/.config/revdiff");
-  }
-}
-
-// ── 5. skills/workflow/SKILL.md ──────────────────────────────────────────────
+// ── 4. skills/workflow/SKILL.md ──────────────────────────────────────────────
 
 {
   const path = join(ROOT, "skills", "workflow", "SKILL.md");
@@ -299,33 +259,7 @@ function bodyAfterFrontmatter(text) {
   }
 }
 
-// ── 6. tools/launch-revdiff.sh ───────────────────────────────────────────────
-
-{
-  const path = join(ROOT, "tools", "launch-revdiff.sh");
-  if (!existsSync(path)) {
-    fail("tools/launch-revdiff.sh: file missing");
-  } else {
-    const text = readText(path);
-    if (!text.startsWith("#!"))
-      fail("tools/launch-revdiff.sh: must start with shebang");
-
-    try {
-      accessSync(path, constants.X_OK);
-    } catch {
-      fail("tools/launch-revdiff.sh: must be executable");
-    }
-
-    // Check header comment (first few lines) for required strings
-    const header = text.split("\n").slice(0, 10).join("\n");
-    if (!header.includes("umputun/revdiff"))
-      fail("tools/launch-revdiff.sh: header must mention umputun/revdiff");
-    if (!header.includes("MIT"))
-      fail("tools/launch-revdiff.sh: header must mention MIT license");
-  }
-}
-
-// ── 7. opencode/index.ts ─────────────────────────────────────────────────────
+// ── 5. opencode/index.ts ─────────────────────────────────────────────────────
 
 {
   const path = join(ROOT, "opencode", "index.ts");
@@ -338,7 +272,7 @@ function bodyAfterFrontmatter(text) {
   }
 }
 
-// ── 8. root index.ts (local directory install shim) ──────────────────────────
+// ── 6. root index.ts (local directory install shim) ──────────────────────────
 
 {
   const path = join(ROOT, "index.ts");

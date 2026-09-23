@@ -1,23 +1,19 @@
-// OpenCode v2 plugin entry: registers 11 agents from bundled markdown,
-// the /revdiff command, and the workflow skill.
+// OpenCode v2 plugin entry: registers 11 agents from bundled markdown
+// and the workflow skill.
 
-import { readFileSync, readdirSync, accessSync, constants } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import * as path from "node:path";
 import { Agent, Plugin, Skill } from "@opencode/plugin";
 import {
   parseMarkdown,
   validateAgentDoc,
-  validateCommandDoc,
   validateSkillDoc,
 } from "./markdown.ts";
 import { composePermissions } from "./permissions.ts";
-import { renderCommand } from "./render.ts";
 
 const root = path.join(import.meta.dirname, "..");
 const agentsDir = path.join(root, "agents");
-const commandsDir = path.join(root, "commands");
 const skillsDir = path.join(root, "skills", "workflow");
-const toolsDir = path.join(root, "tools");
 
 const BUILTINS_TO_REMOVE = ["plan", "build"] as const;
 
@@ -77,45 +73,6 @@ export default Plugin.define({
         });
       }
     });
-
-    // ── Command ─────────────────────────────────────────────────────────
-    const commandPath = path.join(commandsDir, "revdiff.md");
-    const commandRaw = readText(commandPath);
-    const { frontmatter: cmdFm, body: cmdBody } =
-      parseMarkdown<unknown>(commandRaw);
-    const cmdDoc = validateCommandDoc(cmdFm);
-    const launcherPath = path.join(toolsDir, "launch-revdiff.sh");
-
-    // Fail-fast: verify launcher is executable and template has placeholder.
-    try {
-      accessSync(launcherPath, constants.X_OK);
-    } catch {
-      throw new Error(
-        `opencode-workflow: launcher not executable: ${launcherPath}`,
-      );
-    }
-    if (!cmdBody.includes("{{REVDIFF_LAUNCHER}}")) {
-      throw new Error(
-        "opencode-workflow: command template missing {{REVDIFF_LAUNCHER}}",
-      );
-    }
-
-    await ctx.command.transform((editor) =>
-      editor.add({
-        name: "revdiff",
-        description: cmdDoc.description,
-        execute: async (input) => {
-          const userText = input.prompt?.text ?? "";
-          const text = renderCommand(cmdBody, launcherPath, userText);
-          await ctx.session.prompt({
-            ...input.prompt,
-            sessionID: input.sessionID,
-            delivery: input.delivery,
-            text,
-          });
-        },
-      }),
-    );
 
     // ── Skill ───────────────────────────────────────────────────────────
     const skillPath = path.join(skillsDir, "SKILL.md");

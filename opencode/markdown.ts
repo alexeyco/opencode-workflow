@@ -17,10 +17,6 @@ export interface AgentDoc {
   readonly permissions: PermissionRule[];
 }
 
-export interface CommandDoc {
-  readonly description: string;
-}
-
 export interface SkillDoc {
   readonly name: string;
   readonly description: string;
@@ -107,17 +103,6 @@ export function validateAgentDoc(value: unknown): AgentDoc {
     return { ...doc, color: v.color };
   }
   return doc;
-}
-
-export function validateCommandDoc(value: unknown): CommandDoc {
-  if (!value || typeof value !== "object") {
-    throw new Error("command doc: frontmatter must be an object");
-  }
-  const v = value as Record<string, unknown>;
-  if (typeof v.description !== "string") {
-    throw new Error("command doc: frontmatter missing string 'description'");
-  }
-  return { description: v.description };
 }
 
 export function validateSkillDoc(value: unknown): SkillDoc {

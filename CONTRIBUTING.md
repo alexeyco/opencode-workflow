@@ -5,7 +5,7 @@
 - Never push to `master`.
 - Branch from `master`: `git checkout -b feat/<topic>`.
 - Commit messages: no conventional prefixes (`feat:`, `fix:`, …), past tense —
-  e.g. `Added revdiff command placeholder`, `Fixed permission composition order`.
+  e.g. `Added workflow skill`, `Fixed permission composition order`.
 
 ## Development
 
@@ -28,18 +28,6 @@ Test locally without publishing (local installs are not copied, edits are live):
 
 Point opencode at the absolute path; edits take effect on the next session
 or `/reload` — no copying, no reinstall.
-
-## Vendored launcher sync
-
-`tools/launch-revdiff.sh` is vendored from
-[umputun/revdiff](https://github.com/umputun/revdiff)
-(`.claude-plugin/skills/revdiff/scripts/launch-revdiff.sh`, MIT).
-
-To re-sync:
-
-1. Fetch the latest upstream script.
-2. Update the SHA and date in the attribution header.
-3. Run `make check`.
 
 ## Publishing
 

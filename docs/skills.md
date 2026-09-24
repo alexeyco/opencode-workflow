@@ -17,23 +17,29 @@ The plugin registers **two** skills itself:
   [`agents/<id>.md`](../agents)).
 
 It does **not** bundle companion skills and does not restrict what you
-install — discovery is yours.
+install — discovery is yours. What it _does_ restrict is what each agent
+may load by default: a strict contract-only whitelist — each agent's own
+plugin skill and nothing else.
 
-The default rule per agent, straight from the frontmatter:
+The default rules per agent, straight from the frontmatter — deny all
+skills, then allow back only the contract:
 
 - All nine subagents:
 
   ```yaml
-  - { action: skill, resource: "*", effect: allow }
+  - { action: skill, resource: "*", effect: deny }
+  - { action: skill, resource: "workflow-subagent", effect: allow }
   ```
 
-  → every subagent sees **whatever is installed** in your environment —
-  and `workflow-subagent` is contractually mandatory: each subagent's
-  prompt hard-requires loading it before any action and replying in its
-  report format (per-agent payload guidance in each `agents/<id>.md`).
+  `workflow-subagent` is contractually mandatory: each subagent's prompt
+  hard-requires loading it before any action and replying in its report
+  format (per-agent payload guidance in each `agents/<id>.md`). Every
+  other skill a subagent may use — companion skills included — is
+  opt-in: allow it in your `opencode.jsonc` tail rules, one rule per
+  skill, same deny-then-reallow shape as the recipes below.
 
-- `drive` is `workflow-driver`-only by design — the orchestrator must
-  load the routing skill first and never freelance with others:
+- `drive` uses the same shape by design — the orchestrator must load the
+  routing skill first and never freelance with others:
 
   ```yaml
   - { action: skill, resource: "*", effect: deny }
@@ -42,10 +48,24 @@ The default rule per agent, straight from the frontmatter:
 
 ### Default state
 
-| Agent                                                                                                             | Skill access           |
-| ----------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `drive`                                                                                                           | `workflow-driver` only |
-| `coder`, `tester`, `debugger`, `researcher`, `planner`, `plan-reviewer`, `code-reviewer`, `interviewer`, `writer` | all installed skills   |
+| Agent           | Skills allowed by default |
+| --------------- | ------------------------- |
+| `drive`         | `workflow-driver`         |
+| `coder`         | `workflow-subagent`       |
+| `tester`        | `workflow-subagent`       |
+| `debugger`      | `workflow-subagent`       |
+| `researcher`    | `workflow-subagent`       |
+| `planner`       | `workflow-subagent`       |
+| `plan-reviewer` | `workflow-subagent`       |
+| `code-reviewer` | `workflow-subagent`       |
+| `interviewer`   | `workflow-subagent`       |
+| `writer`        | `workflow-subagent`       |
+
+Contract-only: no skill beyond the agent's own ships in the default
+whitelist — companion skills included (see
+[Companion skills](#companion-skills)). Enable one with a single
+`allow` rule per agent in your config tail. Everything outside a row is
+denied until you allow it.
 
 ## Tuning via `opencode.jsonc`
 
@@ -84,10 +104,13 @@ segment 3 always beats segment 2, which beats segment 1. Composition is
 idempotent: rules identical to a plugin rule or a default are not
 appended twice.
 
-### Recipe — restrict `coder` to two companion skills
+### Recipe — set an explicit skill list for `coder`
 
-Deny everything, then re-allow — the kept set **must include
-`workflow-subagent`**, shown second below:
+To replace a subagent's contract-only default outright, deny everything
+in the tail, then re-allow the kept set — it **must include
+`workflow-subagent`**, shown second below, plus whatever else the role
+should see (this example adds `test-driven-development` and
+`systematic-debugging`):
 
 ```jsonc
 // opencode.jsonc
@@ -117,10 +140,18 @@ Deny everything, then re-allow — the kept set **must include
 }
 ```
 
+To merely _add_ one skill on top of the contract-only default — the way
+to enable any companion or extra skill — skip the deny-all and append
+the single `allow` rule — it lands in the tail, so `findLast` beats the
+plugin's `{ skill, *, deny }`.
+
 ### Recipe — deny one noisy skill for all subagents
 
-Permission rules are **per agent** — there is no per-role grouping, so
-repeat the rule for each agent you want it on:
+The contract-only default already keeps every unlisted skill away from
+every subagent; you need this recipe once a skill _is_ allowed — one you
+added in the tail — and want it gone for some agents. Permission
+rules are **per agent** — there is no per-role grouping, so repeat the
+rule for each agent you want it on:
 
 ```jsonc
 // opencode.jsonc
@@ -144,13 +175,14 @@ repeat the rule for each agent you want it on:
 The top-level `permissions` array is the tempting shortcut — it applies
 to every agent. Per the plugin's own composition (and its tests, which
 model config rules — global and per-agent alike — as landing in the
-tail _after_ plugin rules), such a global deny does in practice beat
-the plugin's catch-all allow, rather than being silently overridden.
-Two caveats keep per-agent overrides the recommended route: the tail
-segment keeps the order opencode resolved, so how global and per-agent
-rules interleave is host-determined; and a global rule also hits
-primaries — including `drive`, whose skill surface you may want to keep
-deliberately curated. Prefer explicit per-agent rules.
+tail _after_ plugin rules), such a global deny always beats any earlier
+allow of that skill — yours from the config tail included — rather than
+being silently overridden. Two caveats keep per-agent overrides the
+recommended route: the tail segment keeps the order opencode resolved,
+so how global and per-agent rules interleave is host-determined; and a
+global rule also hits primaries — including `drive`, whose skill
+surface you may want to keep deliberately curated. Prefer explicit
+per-agent rules.
 
 ### Recipe — give `drive` extra skills
 
@@ -183,31 +215,41 @@ depends entirely on `drive`'s system prompt. Not recommended.
 
 ## Companion skills
 
-The `workflow-driver` methodology is designed to pair with these skills
-when they are installed in your environment — they are **not bundled**,
-and steps degrade gracefully when one is missing. Every role below
-still runs under the bundled `workflow-subagent` contract:
+The `workflow-driver` methodology is designed to pair with the optional
+skills below when they are installed in your environment — they are
+**not bundled**, **not pre-allowed**, and steps degrade gracefully when
+one is missing. Every role below still runs under the bundled
+`workflow-subagent` contract:
 
-| Skill                     | Reinforces step | Purpose                             |
-| ------------------------- | --------------- | ----------------------------------- |
-| `grilling`                | interviewer     | relentless requirements questions   |
-| `writing-plans`           | planner         | plan structure and DoD discipline   |
-| `test-driven-development` | coder           | tests-before-code workflow          |
-| `caveman-review`          | code-reviewer   | blunt, high-signal diff review      |
-| `systematic-debugging`    | debugger        | disciplined reproduce → root-cause  |
-| `docmap`                  | writer          | README / AGENTS.md / docs blueprint |
+| Skill                     | Optional pairing for | Purpose                             |
+| ------------------------- | -------------------- | ----------------------------------- |
+| `grilling`                | interviewer          | relentless requirements questions   |
+| `writing-plans`           | planner              | plan structure and DoD discipline   |
+| `test-driven-development` | coder                | tests-before-code workflow          |
+| `caveman-review`          | code-reviewer        | blunt, high-signal diff review      |
+| `systematic-debugging`    | debugger             | disciplined reproduce → root-cause  |
+| `docmap`                  | writer               | README / AGENTS.md / docs blueprint |
 
 They come from your own skill directories (`~/.config/opencode/skills`,
 `~/.agents/skills`, project `.opencode/skills`, …) or any `skills`
-config entry — install whichever you want; agents with `skill: * allow`
-pick them up automatically.
+config entry — install whichever you want. Nothing in this table ships
+in an agent's default whitelist (see [Default state](#default-state)):
+enable a pairing with one `allow` rule per agent, appended to your
+`opencode.jsonc` tail — the add-a-single-skill shape shown under the
+[`coder` recipe](#recipe--set-an-explicit-skill-list-for-coder).
+`researcher`, `plan-reviewer` and `tester` have no listed pairing, but
+by default no role allows anything beyond `workflow-subagent` anyway.
 
 ## Troubleshooting
 
 - **Skill not visible** → is it `SKILL.md` (all caps) with valid
   `name`/`description` frontmatter, in a folder matching the skill name,
   in one of the [opencode discovery
-  locations](https://opencode.ai/docs/skills)?
+  locations](https://opencode.ai/docs/skills)? And is it in that agent's
+  whitelist — by default each agent allows only its own contract skill
+  (`workflow-subagent`, `workflow-driver` for `drive`), so anything
+  else must be allowed in your config tail (see
+  [Default state](#default-state))?
 - **`permission denied` on load** → remember last-match-wins: your rule
   only beats a plugin rule if it is in the config tail (it always is for
   `agents.<id>.permissions`), and a broader later rule can undo a

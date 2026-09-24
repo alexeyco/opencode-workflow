@@ -143,6 +143,12 @@ function parseFrontmatter(text) {
     "external_directory",
   ]);
   const VALID_EFFECTS = new Set(["allow", "ask", "deny"]);
+  // Exact skill contract for every subagent (ordered): deny-all skills, then
+  // allow workflow-subagent. Extra skills are opt-in via user tail rules.
+  const SUBAGENT_SKILL_RULES = [
+    ["skill", "*", "deny"],
+    ["skill", "workflow-subagent", "allow"],
+  ];
 
   const agentsDir = join(ROOT, "agents");
   if (!existsSync(agentsDir)) {
@@ -222,17 +228,16 @@ function parseFrontmatter(text) {
               `agents/drive.md: must have exactly 2 skill rules (deny-all + workflow-driver allow), got ${skillRules.length}`,
             );
         } else {
-          const allowStar = skillRules.filter(
-            (p) => p.resource === "*" && p.effect === "allow",
-          );
-          if (allowStar.length !== 1)
+          const actual = skillRules.map((p) => [
+            p.action,
+            p.resource,
+            p.effect,
+          ]);
+          if (JSON.stringify(actual) !== JSON.stringify(SUBAGENT_SKILL_RULES)) {
             fail(
-              `agents/${id}.md: must have exactly one {skill, *, allow}, got ${allowStar.length}`,
+              `agents/${id}.md: skill rules must be ${JSON.stringify(SUBAGENT_SKILL_RULES)} (ordered), got ${JSON.stringify(actual)}`,
             );
-          if (skillRules.length !== 1)
-            fail(
-              `agents/${id}.md: must have exactly 1 skill rule, got ${skillRules.length}`,
-            );
+          }
         }
       }
     }

@@ -30,6 +30,10 @@ opencode-workflow/
 - Agent `.md` files: no `model:` pins, array-style permissions with the v2
   action vocabulary (`read`, `edit`, `shell`, `subagent`, `skill`, `glob`,
   `grep`, `question`, `webfetch`, `websearch`, `external_directory`).
+- Subagent `skill` rules ship contract-only: deny `*`, allow
+  `workflow-subagent` (`drive`: `workflow-driver` only) — each agent
+  gets exactly its own plugin skill. No companion skills are
+  pre-allowed; extra skills are opt-in via user tail rules.
 - Permission composition order: defaults → plugin rules → user rules,
   last match wins (`Array.prototype.findLast`).
 - Assets are read at runtime relative to `import.meta.dirname` — keep

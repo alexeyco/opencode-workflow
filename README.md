@@ -10,7 +10,9 @@ A complete multi-agent engineering team for OpenCode v2 — one orchestrator pri
 
 - **Delegation-first orchestration.** `drive` breaks work into parallel waves, gates each wave on a Definition-of-Done, and never falls back to "do it yourself" — subagents own the work end-to-end.
 - **10 role-tuned agents, role-scoped permission sets.** Each agent ships with the narrowest permission set it needs; no agent gets more than its role requires.
-- **Skills stay yours.** Agents see every skill installed in your environment; tune access per agent from `opencode.jsonc`.
+- **Skills stay yours.** Shipped skill defaults are contract-only —
+  each agent loads exactly its own plugin skill and nothing else;
+  install whatever you want and opt each agent in from `opencode.jsonc`.
 - **Coexists with stock `plan` / `build`** — the plugin no longer removes
   them; to disable them yourself:
   [docs/agents.md#built-in-plan--build-agents](docs/agents.md#built-in-plan--build-agents).
@@ -50,18 +52,21 @@ OpenCode v2 native key is `plugins`; opencode installs the npm package automatic
 
 ## Tuning subagent skill access
 
-By default every agent **except `drive`** may load **all** skills
-discovered by opencode; `drive` is `workflow-driver`-only. Defaults and
-discovery paths: [docs/skills.md](docs/skills.md#default-state).
+Shipped defaults are a **contract-only whitelist**: `drive` loads
+`workflow-driver`; every subagent loads the mandatory
+`workflow-subagent` contract — and nothing else. Any other skill,
+companion skills included, is purely opt-in: append one `allow` rule
+for it in the tail and `findLast` beats the plugin's deny-all.
+Full table and discovery paths: [docs/skills.md](docs/skills.md#default-state).
 
 Your `opencode.jsonc` rules are applied **after** the plugin's rules —
 last match wins ([composition order](docs/skills.md#composition-order--why-your-rules-win)).
-To restrict a subagent, deny skills categorically with
-`{ "action": "skill", "resource": "*", "effect": "deny" }`, then
-re-allow what the role needs — the kept set must always include the
-mandatory `workflow-subagent`.
+To give a subagent another skill, append that single `allow` rule; to
+replace the kept set outright, deny skills categorically with
+`{ "action": "skill", "resource": "*", "effect": "deny" }` first — the
+kept set must always include the mandatory `workflow-subagent`.
 
-Full worked example and more recipes: [docs/skills.md](docs/skills.md#recipe--restrict-coder-to-two-companion-skills).
+Full worked example and more recipes: [docs/skills.md](docs/skills.md#recipe--set-an-explicit-skill-list-for-coder).
 
 > Keep `workflow-driver` allowed for `drive` and `workflow-subagent`
 > allowed for every subagent — the plugin's methodology breaks without
@@ -69,11 +74,29 @@ Full worked example and more recipes: [docs/skills.md](docs/skills.md#recipe--re
 
 ## Companion skills (optional)
 
-The methodology is designed to pair with companion skills such as
-`grilling`, `writing-plans` or `test-driven-development` when installed
-in your environment — they are **not bundled** and steps degrade
-gracefully when one is missing. Full role mapping:
-[docs/skills.md](docs/skills.md#companion-skills).
+The methodology is designed to pair with companion skills when they are
+installed in your environment — they are **not bundled**, **not
+pre-allowed**, and steps degrade gracefully when one is missing. Each
+role's optional pairings are listed in
+[docs/skills.md](docs/skills.md#companion-skills); enable a pairing with
+one `allow` rule appended to the tail:
+
+```jsonc
+// opencode.jsonc — let coder load test-driven-development
+{
+  "agents": {
+    "coder": {
+      "permissions": [
+        {
+          "action": "skill",
+          "resource": "test-driven-development",
+          "effect": "allow",
+        },
+      ],
+    },
+  },
+}
+```
 
 ## Models
 

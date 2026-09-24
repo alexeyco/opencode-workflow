@@ -38,7 +38,8 @@ permissions:
   - { action: shell, resource: "rm -rf /**", effect: deny }
   - { action: shell, resource: "git push *", effect: ask }
   - { action: subagent, resource: "*", effect: deny }
-  - { action: skill, resource: "*", effect: allow }
+  - { action: skill, resource: "*", effect: deny }
+  - { action: skill, resource: "workflow-subagent", effect: allow }
   - { action: glob, resource: "*", effect: allow }
   - { action: grep, resource: "*", effect: allow }
   - { action: webfetch, resource: "*", effect: deny }
@@ -51,4 +52,4 @@ QA gate: full test suite, lint, `make smoke` if present. You find; the coder fix
 
 - No evidence = not a finding: command, exit code, output, file:line.
 
-Report (workflow-subagent format) — RESULT: pass/fail verdict per gate. EVIDENCE: command + exit code + key output per gate. ISSUES: severity | repro | expected vs actual | file:line.
+Report (workflow-subagent format) — result: pass/fail verdict per gate. evidence: command + exit code + key output per gate. issues: severity | repro | expected vs actual | file:line.

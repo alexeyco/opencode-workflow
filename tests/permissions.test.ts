@@ -79,11 +79,14 @@ test("composePermissions: fresh-create ordering", () => {
       DRIVE_MD_RULES[i],
     );
   }
-  // Tail: global + user rules (non-default, non-md).
+  // Tail: global + user rules, verbatim. The sudo-deny rule is byte-equal
+  // to a drive md rule but survives in tail position (last-match-wins is
+  // positional; composition never filters the tail by content).
   const tail = result.slice(
     DEFAULT_PERMISSION_RULES.length + DRIVE_MD_RULES.length,
   );
   assert.deepStrictEqual(tail, [
+    { action: "shell", resource: "sudo *", effect: "deny" },
     { action: "skill", resource: "grilling", effect: "deny" },
   ]);
 });
@@ -185,4 +188,99 @@ test("resolvePermission: semantic findLast with glob matching", () => {
     "deny",
     "other skills resolve to deny via drive's deny-all rule",
   );
+});
+
+// Coder-like md (synthetic): strict skill whitelist shape with one extra
+// ordered allow rule, used to exercise positional stripping and tail order.
+const CODER_MD_RULES: PermissionRule[] = [
+  { action: "skill", resource: "*", effect: "deny" },
+  { action: "skill", resource: "workflow-subagent", effect: "allow" },
+  { action: "skill", resource: "test-driven-development", effect: "allow" },
+];
+
+test("composePermissions: user tail rule identical to a plugin rule survives", () => {
+  const existing: PermissionRule[] = [
+    ...DEFAULT_PERMISSION_RULES.map((r) => ({ ...r })),
+    { action: "skill", resource: "workflow-driver", effect: "allow" }, // duplicate of md rule
+    { action: "skill", resource: "*", effect: "deny" }, // duplicate of md rule
+  ];
+  const result = composePermissions(existing, DRIVE_MD_RULES);
+
+  // Positional stripping: the tail neither starts with defaults nor equals
+  // the full md list, so both duplicates are kept verbatim in tail order.
+  const tail = result.slice(
+    DEFAULT_PERMISSION_RULES.length + DRIVE_MD_RULES.length,
+  );
+  assert.deepStrictEqual(tail, [
+    { action: "skill", resource: "workflow-driver", effect: "allow" },
+    { action: "skill", resource: "*", effect: "deny" },
+  ]);
+
+  // Occurrence counts: 1 from mdRules + 1 from the user's own copy each.
+  const wdAllows = result.filter(
+    (r) =>
+      r.action === "skill" &&
+      r.resource === "workflow-driver" &&
+      r.effect === "allow",
+  );
+  assert.equal(wdAllows.length, 2, "md allow + user's identical tail allow");
+  const skillDenyStars = result.filter(
+    (r) => r.action === "skill" && r.resource === "*" && r.effect === "deny",
+  );
+  assert.equal(skillDenyStars.length, 2, "md deny-all + user's tail deny-all");
+});
+
+test("composePermissions: replacement skill set honors last-match-wins", () => {
+  // Documented recipe: user replaces the kept set outright. Under the old
+  // content-filtering, the tail's {skill,*,deny} and
+  // {skill,workflow-subagent,allow} were dropped as md-rule duplicates,
+  // leaving the plugin's test-driven-development allow uncountermanded.
+  const existing: PermissionRule[] = [
+    ...DEFAULT_PERMISSION_RULES.map((r) => ({ ...r })),
+    { action: "skill", resource: "*", effect: "deny" },
+    { action: "skill", resource: "workflow-subagent", effect: "allow" },
+    { action: "skill", resource: "docmap", effect: "allow" },
+  ];
+  const result = composePermissions(existing, CODER_MD_RULES);
+
+  assert.equal(
+    resolvePermission(result, "skill", "test-driven-development"),
+    "deny",
+    "plugin companion must be denied by the user's replacement deny-all",
+  );
+  assert.equal(
+    resolvePermission(result, "skill", "docmap"),
+    "allow",
+    "user's replacement allow survives",
+  );
+  assert.equal(
+    resolvePermission(result, "skill", "workflow-subagent"),
+    "allow",
+    "contract skill stays allowed via the user's own tail allow",
+  );
+});
+
+test("composePermissions: idempotent when tail duplicates an md rule", () => {
+  const existing: PermissionRule[] = [
+    ...DEFAULT_PERMISSION_RULES.map((r) => ({ ...r })),
+    { action: "skill", resource: "*", effect: "deny" }, // byte-equal to an md rule
+  ];
+  const once = composePermissions(existing, DRIVE_MD_RULES);
+  const twice = composePermissions(once, DRIVE_MD_RULES);
+  assert.ok(
+    deepEqual(once, twice),
+    "compose(compose(base, md), md) must equal compose(base, md)",
+  );
+});
+
+test("composePermissions: first application without defaults prefix keeps tail verbatim", () => {
+  const existing: PermissionRule[] = [
+    { action: "edit", resource: "*", effect: "ask" },
+  ];
+  const result = composePermissions(existing, DRIVE_MD_RULES);
+  assert.deepStrictEqual(result, [
+    ...DEFAULT_PERMISSION_RULES,
+    ...DRIVE_MD_RULES,
+    { action: "edit", resource: "*", effect: "ask" },
+  ]);
 });

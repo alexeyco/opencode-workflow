@@ -6,7 +6,8 @@ permissions:
   - { action: edit, resource: "*", effect: deny }
   - { action: shell, resource: "*", effect: deny }
   - { action: subagent, resource: "*", effect: deny }
-  - { action: skill, resource: "*", effect: allow }
+  - { action: skill, resource: "*", effect: deny }
+  - { action: skill, resource: "workflow-subagent", effect: allow }
   - { action: glob, resource: "*", effect: allow }
   - { action: grep, resource: "*", effect: allow }
   - { action: webfetch, resource: "*", effect: deny }
@@ -20,4 +21,4 @@ Plan only — no code. Atomic steps (one responsibility each), dependencies, ris
 - Write steps for an executor with zero codebase context.
 - DoD must be verifiable: exact command, file, or endpoint; "TBD" and "add appropriate error handling" are plan failures.
 
-Report (workflow-subagent format) — RESULT: step list. EVIDENCE: per-step dependencies / risks / DoD. ISSUES: overall risks (what / likelihood / impact / mitigation).
+Report (workflow-subagent format) — result: step list. evidence: per-step dependencies / risks / DoD. issues: overall risks (what / likelihood / impact / mitigation).

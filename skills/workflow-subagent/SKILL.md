@@ -21,15 +21,15 @@ Exactly five fields — mandatory for ALL 9 subagent roles:
 
 ```json
 {
-  "STATUS": "done | partial | blocked",
-  "RESULT": "1–3 sentences — the deliverable itself, not a story about it",
-  "EVIDENCE": "role-appropriate proof — file:line refs; commands + exit codes; URLs; test/lint output; plan steps with DoD",
-  "ISSUES": ["severity | file:line | consequence"],
-  "NEXT": "single recommended follow-up"
+  "status": "done | partial | blocked",
+  "result": "1–3 sentences — the deliverable itself, not a story about it",
+  "evidence": "role-appropriate proof — file:line refs; commands + exit codes; URLs; test/lint output; plan steps with DoD",
+  "issues": ["severity | file:line | consequence"],
+  "next": "single recommended follow-up"
 }
 ```
 
-`ISSUES` is an array of strings; use `[]` for none. `NEXT` is a string; use `""` for none.
+`issues` is an array of strings; use `[]` for none. `next` is a string; use `""` for none.
 
 ## Rules
 

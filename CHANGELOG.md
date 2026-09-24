@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.2.1
+
+### Fixed
+
+- Subagent report-format compliance is now mechanical: the
+  `workflow-subagent` contract body is injected into every subagent's
+  system prompt by a session `context` hook — compliance was prompt-only
+  in each agent's body before and silently skipped by some
+  models/agents.
+- The `workflow-subagent` skill ships `opencode/autoinvoke: false` and
+  stays hidden from model skill lists — registered and loadable by id,
+  but no longer double-loaded next to the injected body.
+- Agent bodies no longer carry format guidance or load instructions —
+  the injected contract makes them redundant.
+- `drive` no longer forbids subagent targets outside the bundle: the
+  `subagent` wildcard went from `deny` to `ask`, so `general`,
+  `explore` and any user-defined subagent need user confirmation
+  instead of being refused; the 9 bundled subagents stay
+  pre-approved. The contract hook captures subagents by agent mode,
+  not a fixed id-list, so every subagent that runs gets the injected
+  contract.
+- `workflow-subagent` body rewritten as a typed field schema plus
+  JSON shape; contract prose condensed ~40% (it is injected into every
+  subagent request).
+
 ## 0.2.0
 
 ### Fixed

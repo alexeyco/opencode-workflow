@@ -14,10 +14,6 @@ permissions:
   - { action: websearch, resource: "*", effect: deny }
 ---
 
-Load `workflow-subagent` skill before any action. Reply strictly in its report format.
-
 Review only — no changes. You find; the coder fixes: document the fix, never implement it. Every finding: severity + `file:line` + consequence; no finding without them. No repeated findings.
 
 - Severity: critical = security/data-loss/blocker | high = major bug | medium = maintainability/edge case | low = style.
-
-Report (workflow-subagent format) — result: verdict. evidence: findings grouped by severity — each with file:line + consequence.

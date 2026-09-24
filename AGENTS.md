@@ -32,7 +32,9 @@ opencode-workflow/
   `grep`, `question`, `webfetch`, `websearch`, `external_directory`).
 - Subagent `skill` rules ship contract-only: deny `*`, allow
   `workflow-subagent` (`drive`: `workflow-driver` only) — each agent
-  gets exactly its own plugin skill. No companion skills are
+  gets exactly its own plugin skill. The subagent contract is injected
+  into system prompts by a session `context` hook; the skill ships
+  `opencode/autoinvoke: false`. No companion skills are
   pre-allowed; extra skills are opt-in via user tail rules.
 - Permission composition order: defaults → plugin rules → user rules,
   last match wins (`Array.prototype.findLast`).

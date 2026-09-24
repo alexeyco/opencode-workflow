@@ -16,6 +16,17 @@ const agentsDir = path.join(root, "agents");
 const skillsRoot = path.join(root, "skills");
 const SKILL_IDS = ["workflow-driver", "workflow-subagent"] as const;
 
+// Captured set of every subagent visible in the editor after our agents are
+// registered: our 9 + `general` + `explore` + any user-defined subagent.
+// Refreshed on every replay/reload; read by the contract-injection hook below.
+let subagentIDs: ReadonlySet<string> = new Set();
+
+// Read-only view of the captured subagent set, exposed for tests. Not part of
+// the plugin's public surface.
+export function getSubagentIDs(): ReadonlySet<string> {
+  return subagentIDs;
+}
+
 function readText(file: string): string {
   return readFileSync(file, "utf8");
 }
@@ -62,9 +73,22 @@ export default Plugin.define({
           );
         });
       }
+
+      // Capture every subagent in the editor (ours + builtins + user-defined)
+      // by mode, so the contract hook follows the live registry rather than a
+      // hardcoded list. Each replay refreshes the set.
+      subagentIDs = new Set(
+        editor
+          .list()
+          .filter((agent) => agent.mode === "subagent")
+          .map((agent) => String(agent.id)),
+      );
     });
 
     // ── Skills ──────────────────────────────────────────────────────────
+    // Captured workflow-subagent body, pushed verbatim into every subagent's
+    // system prompt by the contract-injection hook below.
+    let subagentContract = "";
     await ctx.skill.transform((editor) => {
       for (const id of SKILL_IDS) {
         const skillPath = path.join(skillsRoot, id, "SKILL.md");
@@ -72,6 +96,9 @@ export default Plugin.define({
         const { frontmatter: skillFm, body: skillBody } =
           parseMarkdown<unknown>(skillRaw);
         const skillDoc = validateSkillDoc(skillFm);
+        if (id === "workflow-subagent") {
+          subagentContract = skillBody;
+        }
         editor.add(
           Skill.Info.make({
             id: Skill.ID.make(id),
@@ -85,5 +112,18 @@ export default Plugin.define({
     });
 
     await ctx.skill.reload();
+
+    // ── Contract body injection ────────────────────────────────────────
+    // Inject the workflow-subagent contract body into every subagent's system
+    // prompt (drive is primary and carries workflow-driver instead); the body
+    // is the skill's own text, so agents need no per-file copy.
+    ctx.session.hook("context", (event) => {
+      if (subagentIDs.has(event.agent)) {
+        event.system.push({
+          type: "text",
+          text: subagentContract,
+        });
+      }
+    });
   },
 });

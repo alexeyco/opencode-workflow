@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import plugin from "../opencode/index.ts";
+import plugin, { getSubagentIDs } from "../opencode/index.ts";
 import { DEFAULT_PERMISSION_RULES } from "../opencode/permissions.ts";
 import type { PermissionRule } from "../opencode/markdown.ts";
 
@@ -115,6 +115,7 @@ function createFakeContext(preseedAgents: string[] = ["plan", "build"]) {
   const agentEditor = new FakeAgentEditor(preseedAgents);
   const skillEditor = new FakeSkillEditor();
   let reloadCalled = false;
+  let contextHook: ((event: any) => void) | undefined;
 
   const ctx = {
     agent: {
@@ -132,9 +133,21 @@ function createFakeContext(preseedAgents: string[] = ["plan", "build"]) {
         reloadCalled = true;
       },
     },
+    session: {
+      hook: async (_name: string, cb: (event: any) => void) => {
+        contextHook = cb;
+        return { dispose: async () => {} };
+      },
+    },
   };
 
-  return { ctx, agentEditor, skillEditor, getReloadCalled: () => reloadCalled };
+  return {
+    ctx,
+    agentEditor,
+    skillEditor,
+    getReloadCalled: () => reloadCalled,
+    getHook: () => contextHook,
+  };
 }
 
 test("plugin: registers 10 agents with correct modes", async () => {
@@ -255,7 +268,13 @@ test("plugin: idempotent across multiple runs", async () => {
 // Every subagent carries the exact same ordered skill whitelist contract:
 // deny-all first, then workflow-subagent. Extra skills are opt-in via user
 // tail rules (findLast semantics).
-const SUBAGENT_IDS = [
+const SUBAGENT_SKILL_RULES = [
+  ["skill", "*", "deny"],
+  ["skill", "workflow-subagent", "allow"],
+];
+
+// The 9 plugin subagent IDs, in registration order.
+const EXPECTED_SUBAGENT_IDS = [
   "interviewer",
   "researcher",
   "planner",
@@ -267,16 +286,67 @@ const SUBAGENT_IDS = [
   "debugger",
 ];
 
-const SUBAGENT_SKILL_RULES = [
-  ["skill", "*", "deny"],
-  ["skill", "workflow-subagent", "allow"],
-];
+test("plugin: hook targets all subagents and excludes primaries after setup", async () => {
+  // Seed the editor with builtin primaries plus a non-plugin subagent
+  // (general) to prove the hook is scoped by mode, not by a fixed list.
+  const { ctx, agentEditor, skillEditor, getHook } = createFakeContext([
+    "plan",
+    "build",
+    "general",
+  ]);
+  agentEditor.get("general")!.mode = "subagent";
+  await plugin.setup(ctx as any);
+
+  const ids = getSubagentIDs();
+
+  // Our 9 plugin subagents are captured...
+  for (const id of EXPECTED_SUBAGENT_IDS) {
+    assert.equal(ids.has(id), true, `${id} should be captured as a subagent`);
+  }
+
+  // ...alongside any other subagent registered in the editor.
+  assert.equal(ids.has("general"), true, "general should be captured");
+
+  // Primaries (builtins + drive) are excluded.
+  assert.equal(ids.has("plan"), false, "plan must not be captured");
+  assert.equal(ids.has("build"), false, "build must not be captured");
+  assert.equal(ids.has("drive"), false, "drive must not be captured");
+
+  // The hook injects the full workflow-subagent body (not a one-line
+  // instruction) for every subagent, and nothing for primaries/unknowns.
+  const hook = getHook();
+  assert.ok(hook, "context hook must be registered");
+  const skill = skillEditor
+    .list()
+    .find((s: any) => s.id === "workflow-subagent");
+  assert.ok(skill, "workflow-subagent skill must be registered");
+
+  const sub: any[] = [];
+  hook!({ agent: "coder", system: sub });
+  assert.equal(sub.length, 1, "one block pushed for a subagent");
+  assert.equal(sub[0].type, "text");
+  assert.equal(
+    sub[0].text,
+    skill!.content,
+    "injected text must equal the workflow-subagent skill body",
+  );
+  assert.ok(
+    skill!.content.includes("Five fields"),
+    "injected body must carry the contract, not a one-line instruction",
+  );
+
+  const others: any[] = [];
+  hook!({ agent: "plan", system: others });
+  hook!({ agent: "drive", system: others });
+  hook!({ agent: "nonexistent", system: others });
+  assert.deepEqual(others, []);
+});
 
 test("plugin: subagents carry the exact ordered skill whitelist contract", async () => {
   const { ctx, agentEditor } = createFakeContext([]);
   await plugin.setup(ctx as any);
 
-  for (const id of SUBAGENT_IDS) {
+  for (const id of EXPECTED_SUBAGENT_IDS) {
     const agent = agentEditor.get(id)!;
     assert.ok(agent, `agent ${id} should exist`);
     const skillRules = agent.permissions

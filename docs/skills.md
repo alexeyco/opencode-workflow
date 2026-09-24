@@ -13,8 +13,8 @@ The plugin registers **two** skills itself:
 - `workflow-subagent` ([`skills/workflow-subagent/SKILL.md`](../skills/workflow-subagent/SKILL.md)) —
   the universal subagent contract: English reasoning for token economy,
   strict brevity, and the one JSON report format every subagent returns
-  (defined by the skill itself; per-agent payload guidance lives in each
-  [`agents/<id>.md`](../agents)).
+  (defined by the skill itself; its body is injected into every
+  subagent's system prompt).
 
 It does **not** bundle companion skills and does not restrict what you
 install — discovery is yours. What it _does_ restrict is what each agent
@@ -31,12 +31,12 @@ skills, then allow back only the contract:
   - { action: skill, resource: "workflow-subagent", effect: allow }
   ```
 
-  `workflow-subagent` is contractually mandatory: each subagent's prompt
-  hard-requires loading it before any action and replying in its report
-  format (per-agent payload guidance in each `agents/<id>.md`). Every
-  other skill a subagent may use — companion skills included — is
-  opt-in: allow it in your `opencode.jsonc` tail rules, one rule per
-  skill, same deny-then-reallow shape as the recipes below.
+  `workflow-subagent` is contractually mandatory: the plugin's session
+  context hook injects its full contract body into every subagent's
+  system prompt (see [Enforcement](#enforcement)). Every other skill a
+  subagent may use — companion skills included — is opt-in: allow it
+  in your `opencode.jsonc` tail rules, one rule per skill, same
+  deny-then-reallow shape as the recipes below.
 
 - `drive` uses the same shape by design — the orchestrator must load the
   routing skill first and never freelance with others:
@@ -45,6 +45,28 @@ skills, then allow back only the contract:
   - { action: skill, resource: "*", effect: deny }
   - { action: skill, resource: "workflow-driver", effect: allow }
   ```
+
+### Enforcement
+
+Subagent compliance is mechanical, not prompt-hoped: a session
+`context` hook in [`opencode/index.ts`](../opencode/index.ts) injects
+the `workflow-subagent` contract body into the system prompt of every
+agent in subagent mode, captured by mode rather than a fixed id-list —
+built-in and user-defined subagents get it too. Agent bodies carry no
+load instruction and no format guidance; enforcement is solely the
+hook, and the skill body is the single source of the contract text.
+English reasoning, brevity, and the report schema are always in
+effect. The skill stays registered but ships
+`metadata: { opencode/autoinvoke: false }` and is hidden from the
+model's skill list to prevent double-load next to the injected body;
+it remains loadable by id explicitly.
+
+Note for users overriding skills: hiding `workflow-subagent` from a
+subagent's skill list (deny rules) does **not** remove the injected
+contract — permissions gate loading, the hook guarantees compliance;
+that is by design. Do not remove the file the hook injects,
+[`skills/workflow-subagent/SKILL.md`](../skills/workflow-subagent/SKILL.md)
+— both the registration and the injection read it.
 
 ### Default state
 
@@ -207,11 +229,11 @@ would take `workflow-driver` away from `drive` — the plugin's routing then
 depends entirely on `drive`'s system prompt. Not recommended.
 
 > [!WARNING]
-> Whenever you override the available skills of **any** agent, keep
-> `workflow-driver` allowed on `drive` and `workflow-subagent` allowed
-> on every subagent — these two skills carry the plugin's methodology
-> (routing and the unified report format), and overriding them away
-> breaks it.
+> When you override **any** agent's skills, keep `workflow-driver`
+> allowed on `drive` and `workflow-subagent` allowed on every subagent.
+> For `drive`, removing `workflow-driver` breaks routing; the subagent
+> contract is enforced by the plugin, but keep its allow so agents can
+> still consult the skill by id.
 
 ## Companion skills
 

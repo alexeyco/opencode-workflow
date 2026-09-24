@@ -18,38 +18,46 @@ function ruleEquals(a: PermissionRule, b: PermissionRule): boolean {
   );
 }
 
-function isDefaultRule(rule: PermissionRule): boolean {
-  return DEFAULT_PERMISSION_RULES.some((d) => ruleEquals(d, rule));
-}
-
-function anyRuleEquals(
-  rule: PermissionRule,
-  set: readonly PermissionRule[],
+/** True when `candidate` appears verbatim (ordered) at `offset` in `rules`. */
+function matchesPrefix(
+  rules: readonly PermissionRule[],
+  offset: number,
+  candidate: readonly PermissionRule[],
 ): boolean {
-  return set.some((s) => ruleEquals(s, rule));
+  if (offset + candidate.length > rules.length) {
+    return false;
+  }
+  return candidate.every((rule, i) => ruleEquals(rules[offset + i]!, rule));
 }
 
 /**
  * Compose final permission order:
- *   [all 5 defaults in canonical order, ...mdRules, ...pre-existing non-default non-md rules]
+ *   [all 5 defaults in canonical order, ...mdRules, ...verbatim tail]
  *
  * The 5 defaults are always present in the output, even if not in the input.
- * Idempotent: composing the result again with the same mdRules yields a
- * deep-equal array. Pre-existing md rules are classified as "rest" on the
- * second pass but dropped from it (they already sit in the middle), so no
- * duplication occurs.
+ *
+ * Stripping is positional, never by content: if `existing` starts with the
+ * defaults in canonical order, that prefix is dropped; then if the segment
+ * right after it equals `mdRules` (ordered), that segment is dropped too.
+ * Everything after is the user's verbatim tail — rules identical to an
+ * mdRule survive in tail position, so `findLast` still gives user rules
+ * final say (a full "replace the kept set" override works).
+ *
+ * Idempotent: the output starts with defaults then mdRules, so composing it
+ * again strips exactly that head, keeps the tail, and re-prepends in the
+ * same order — a deep-equal array.
  */
 export function composePermissions(
   existing: readonly PermissionRule[],
   mdRules: readonly PermissionRule[],
 ): PermissionRule[] {
-  const rest: PermissionRule[] = [];
-  for (const rule of existing) {
-    if (!isDefaultRule(rule)) {
-      rest.push(rule);
-    }
+  let head = 0;
+  if (matchesPrefix(existing, head, DEFAULT_PERMISSION_RULES)) {
+    head += DEFAULT_PERMISSION_RULES.length;
   }
-  // Drop from `rest` anything already covered by mdRules (idempotency).
-  const filteredRest = rest.filter((r) => !anyRuleEquals(r, mdRules));
-  return [...DEFAULT_PERMISSION_RULES, ...mdRules, ...filteredRest];
+  if (matchesPrefix(existing, head, mdRules)) {
+    head += mdRules.length;
+  }
+  const tail = existing.slice(head);
+  return [...DEFAULT_PERMISSION_RULES, ...mdRules, ...tail];
 }

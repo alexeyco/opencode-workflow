@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.2
+
+### Changed
+
+- `workflow-driver` parallelism rule: read-only long-running subagent steps may run in the background (native to OpenCode V2); join before stage transitions.
+- Per-agent model routing documented in README.
+
 ## 0.2.1
 
 ### Fixed

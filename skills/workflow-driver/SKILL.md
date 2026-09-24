@@ -25,6 +25,7 @@ description: "Orchestration router for the `drive` agent. Routes every task thro
 - Flow: [interviewer ∥ researcher ×N] → [planner → [plan-reviewer →] user-gate] → [debugger if defect] → [coder ×N on disjoint files] → tester → [code-reviewer → coder if findings] → [writer].
 - Parallelism (default posture — waves, not chains):
   - Independent steps launch as multiple `subagent` calls in one turn; cap 4 concurrent.
+  - Read-only long-running steps (interviewer, researcher, plan-reviewer, code-reviewer) may run in background — join before the next stage transition.
   - Read-only agents (interviewer, researcher, plan-reviewer, code-reviewer) fan out freely.
   - Coders in parallel only on disjoint file sets; shared files → serialize.
   - Join: merge all wave results before next stage (tester starts after join).

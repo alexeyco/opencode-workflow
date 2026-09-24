@@ -38,20 +38,23 @@ Two properties hold across the whole catalog:
 
 Summaries below reflect the actual frontmatter; the raw rule lists are
 in each `agents/<id>.md`. `—` means no explicit rule — the built-in
-`{ action: "*", resource: "*", effect: "allow" }` default applies.
+`{ action: "*", resource: "*", effect: "allow" }` default applies. The
+`Skill` column lists each agent's shipped whitelist — its own plugin
+skill and nothing else; every other skill, companion skills included,
+is opt-in via your config tail ([per-role table](skills.md#default-state)).
 
-| Agent           | Read | Edit | Shell                             | Subagents     | Skill                  | Web              |
-| --------------- | ---- | ---- | --------------------------------- | ------------- | ---------------------- | ---------------- |
-| `drive`         | ✓    | ✗    | ask-by-default + narrow allowlist | 9 allowlisted | `workflow-driver` only | fetch ✓          |
-| `coder`         | ✓    | ✓    | open + guardrails                 | ✗             | all                    | ✗ fetch + search |
-| `tester`        | ✓    | ✗    | open + guardrails + redirect deny | ✗             | all                    | ✗ fetch + search |
-| `debugger`      | ✓    | ✗    | allowlist + guardrails            | ✗             | all                    | ✗ fetch + search |
-| `researcher`    | ✓    | ✗    | denied                            | ✗             | all                    | fetch ✓          |
-| `planner`       | ✓    | ✗    | denied                            | ✗             | all                    | ✗ fetch + search |
-| `plan-reviewer` | ✓    | ✗    | denied                            | ✗             | all                    | ✗ fetch + search |
-| `code-reviewer` | ✓    | ✗    | denied                            | ✗             | all                    | ✗ fetch + search |
-| `interviewer`   | ✓    | ✗    | denied                            | ✗             | all                    | ✗ fetch + search |
-| `writer`        | ✓    | ✓    | ask-by-default + docs allowlist   | ✗             | all                    | fetch ✓          |
+| Agent           | Read | Edit | Shell                             | Subagents     | Skill                    | Web              |
+| --------------- | ---- | ---- | --------------------------------- | ------------- | ------------------------ | ---------------- |
+| `drive`         | ✓    | ✗    | ask-by-default + narrow allowlist | 9 allowlisted | `workflow-driver` only   | fetch ✓          |
+| `coder`         | ✓    | ✓    | open + guardrails                 | ✗             | `workflow-subagent` only | ✗ fetch + search |
+| `tester`        | ✓    | ✗    | open + guardrails + redirect deny | ✗             | `workflow-subagent` only | ✗ fetch + search |
+| `debugger`      | ✓    | ✗    | allowlist + guardrails            | ✗             | `workflow-subagent` only | ✗ fetch + search |
+| `researcher`    | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | fetch ✓          |
+| `planner`       | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | ✗ fetch + search |
+| `plan-reviewer` | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | ✗ fetch + search |
+| `code-reviewer` | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | ✗ fetch + search |
+| `interviewer`   | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | ✗ fetch + search |
+| `writer`        | ✓    | ✓    | ask-by-default + docs allowlist   | ✗             | `workflow-subagent` only | fetch ✓          |
 
 All agents share `glob` ✓ and `grep` ✓ (explicit or via default);
 `question` ✓ is explicit on `drive` and `interviewer` only. Only the
@@ -123,9 +126,12 @@ but never modify anything:
 - `interviewer` — offline, but `question` ✓ (requirements elicitation
   is conversation).
 
-All nine subagents share: `subagent` ✗ (no recursive delegation) and
-`skill` all-access with `workflow-subagent` required before any action —
-see [docs/skills.md](skills.md#default-state).
+All nine subagents share: `subagent` ✗ (no recursive delegation) and a
+strict contract-only `skill` whitelist — the `workflow-subagent` skill
+(required before any action) alone; `drive` mirrors the shape with
+`workflow-driver`. Everything else, companion skills included, needs an
+explicit allow in your config tail — see
+[docs/skills.md](skills.md#default-state).
 
 ### Shared guardrail matrix
 

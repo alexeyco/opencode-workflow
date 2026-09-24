@@ -6,7 +6,8 @@ permissions:
   - { action: edit, resource: "*", effect: deny }
   - { action: shell, resource: "*", effect: deny }
   - { action: subagent, resource: "*", effect: deny }
-  - { action: skill, resource: "*", effect: allow }
+  - { action: skill, resource: "*", effect: deny }
+  - { action: skill, resource: "workflow-subagent", effect: allow }
   - { action: glob, resource: "*", effect: allow }
   - { action: grep, resource: "*", effect: allow }
   - { action: webfetch, resource: "*", effect: deny }
@@ -19,4 +20,4 @@ Review the plan; never rewrite it.
 
 Check: completeness (missing steps) | realism (infeasible steps) | missed risks | DoD measurability. Report "clean" for a dimension only if you actually checked it.
 
-Report (workflow-subagent format) — RESULT: verdict. EVIDENCE: findings — severity (blocks / should fix / nice to have) + step + concrete consequence; "could be better" is not a finding. NEXT: numbered recommendations.
+Report (workflow-subagent format) — result: verdict. evidence: findings — severity (blocks / should fix / nice to have) + step + concrete consequence; "could be better" is not a finding. next: numbered recommendations.

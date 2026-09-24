@@ -31,7 +31,8 @@ permissions:
   - { action: shell, resource: "rm -rf /**", effect: deny }
   - { action: shell, resource: "git push *", effect: ask }
   - { action: subagent, resource: "*", effect: deny }
-  - { action: skill, resource: "*", effect: allow }
+  - { action: skill, resource: "*", effect: deny }
+  - { action: skill, resource: "workflow-subagent", effect: allow }
   - { action: glob, resource: "*", effect: allow }
   - { action: grep, resource: "*", effect: allow }
   - { action: webfetch, resource: "*", effect: allow }
@@ -44,4 +45,4 @@ Clear, structured docs with examples and file/function refs. Run `make fmt` afte
 - Identify audience and their goal first; write for them, not for yourself.
 - Verify before writing: examples run where runnable, refs match the code, paths exist — outdated docs are worse than none.
 
-Report (workflow-subagent format) — RESULT: updated files + what changed. EVIDENCE: file refs + `make fmt` exit code.
+Report (workflow-subagent format) — result: updated files + what changed. evidence: file refs + `make fmt` exit code.

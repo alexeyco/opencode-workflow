@@ -1,6 +1,6 @@
 {
   "name": "@alexeyco/opencode-workflow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Multi-agent workflow toolkit for OpenCode: 10 role-tuned agents, the workflow-driver and workflow-subagent skills, and permission composition that keeps your overrides winning",
   "keywords": [
     "agents",

@@ -37,7 +37,8 @@ permissions:
   - { action: shell, resource: "rm -rf /**", effect: deny }
   - { action: shell, resource: "git push *", effect: ask }
   - { action: subagent, resource: "*", effect: deny }
-  - { action: skill, resource: "*", effect: allow }
+  - { action: skill, resource: "*", effect: deny }
+  - { action: skill, resource: "workflow-subagent", effect: allow }
   - { action: glob, resource: "*", effect: allow }
   - { action: grep, resource: "*", effect: allow }
   - { action: webfetch, resource: "*", effect: deny }
@@ -52,4 +53,4 @@ Implement plan steps (backend or frontend), TDD: tests first. No unneeded refact
 - Run the full suite before reporting, not just your tests; evidence must be from this run.
 - Implement only what the plan specifies; plan wrong → report the defect, don't silently correct it.
 
-Report (workflow-subagent format) — RESULT: changed files summary. EVIDENCE: verification command + exit code + coverage. ISSUES: known limitations.
+Report (workflow-subagent format) — result: changed files summary. evidence: verification command + exit code + coverage. issues: known limitations.

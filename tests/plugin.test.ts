@@ -252,6 +252,118 @@ test("plugin: idempotent across multiple runs", async () => {
   }
 });
 
+// Every subagent carries the exact same ordered skill whitelist contract:
+// deny-all first, then workflow-subagent. Extra skills are opt-in via user
+// tail rules (findLast semantics).
+const SUBAGENT_IDS = [
+  "interviewer",
+  "researcher",
+  "planner",
+  "plan-reviewer",
+  "coder",
+  "code-reviewer",
+  "tester",
+  "writer",
+  "debugger",
+];
+
+const SUBAGENT_SKILL_RULES = [
+  ["skill", "*", "deny"],
+  ["skill", "workflow-subagent", "allow"],
+];
+
+test("plugin: subagents carry the exact ordered skill whitelist contract", async () => {
+  const { ctx, agentEditor } = createFakeContext([]);
+  await plugin.setup(ctx as any);
+
+  for (const id of SUBAGENT_IDS) {
+    const agent = agentEditor.get(id)!;
+    assert.ok(agent, `agent ${id} should exist`);
+    const skillRules = agent.permissions
+      .filter((r: any) => r.action === "skill")
+      .map((r: any) => [r.action, r.resource, r.effect]);
+    assert.deepStrictEqual(
+      skillRules,
+      SUBAGENT_SKILL_RULES,
+      `${id}: skill rules mismatch`,
+    );
+  }
+});
+
+test("plugin: subagent skill resolution follows the whitelist", async () => {
+  const { ctx, agentEditor } = createFakeContext([]);
+  await plugin.setup(ctx as any);
+
+  // coder: only workflow-subagent resolves to allow, everything else denies
+  const coder = agentEditor.get("coder")!;
+  assert.equal(
+    resolvePermission(coder.permissions, "skill", "workflow-subagent"),
+    "allow",
+  );
+  assert.equal(
+    resolvePermission(coder.permissions, "skill", "test-driven-development"),
+    "deny",
+  );
+  assert.equal(
+    resolvePermission(coder.permissions, "skill", "grilling"),
+    "deny",
+  );
+
+  // interviewer: grilling is no longer a companion — deny-all wins
+  const interviewer = agentEditor.get("interviewer")!;
+  assert.equal(
+    resolvePermission(interviewer.permissions, "skill", "grilling"),
+    "deny",
+  );
+  assert.equal(
+    resolvePermission(interviewer.permissions, "skill", "docmap"),
+    "deny",
+  );
+
+  // researcher: same contract, only workflow-subagent is allowed
+  const researcher = agentEditor.get("researcher")!;
+  assert.equal(
+    resolvePermission(researcher.permissions, "skill", "workflow-subagent"),
+    "allow",
+  );
+  assert.equal(
+    resolvePermission(researcher.permissions, "skill", "writing-plans"),
+    "deny",
+  );
+});
+
+test("plugin: user tail rule opt-in unlocks an extra skill for a subagent", async () => {
+  const { ctx, agentEditor } = createFakeContext(["coder"]);
+
+  // Documented user flow: append a tail allow rule for a formerly-companion
+  // skill on top of the pre-composed defaults.
+  agentEditor.get("coder")!.permissions.push({
+    action: "skill",
+    resource: "grilling",
+    effect: "allow",
+  });
+
+  await plugin.setup(ctx as any);
+
+  const perms = agentEditor.get("coder")!.permissions;
+
+  // Tail rule wins via findLast: grilling is allowed for this user only
+  assert.equal(resolvePermission(perms, "skill", "grilling"), "allow");
+
+  // Contract skills keep their effects
+  assert.equal(resolvePermission(perms, "skill", "workflow-subagent"), "allow");
+  assert.equal(
+    resolvePermission(perms, "skill", "test-driven-development"),
+    "deny",
+  );
+
+  // Everything else stays per the defaults: external_directory is untouched
+  // by coder.md, so the default {external_directory, *, ask} still wins.
+  assert.equal(resolvePermission(perms, "shell", "ls x"), "allow");
+  assert.equal(resolvePermission(perms, "external_directory", "x"), "ask");
+  assert.equal(resolvePermission(perms, "edit", "src/main.ts"), "allow");
+});
+
 test("plugin: drive's composed rules resolve correctly", async () => {
   const { ctx, agentEditor } = createFakeContext([]);
   await plugin.setup(ctx as any);

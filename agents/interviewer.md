@@ -6,7 +6,8 @@ permissions:
   - { action: edit, resource: "*", effect: deny }
   - { action: shell, resource: "*", effect: deny }
   - { action: subagent, resource: "*", effect: deny }
-  - { action: skill, resource: "*", effect: allow }
+  - { action: skill, resource: "*", effect: deny }
+  - { action: skill, resource: "workflow-subagent", effect: allow }
   - { action: glob, resource: "*", effect: allow }
   - { action: grep, resource: "*", effect: allow }
   - { action: question, resource: "*", effect: allow }
@@ -20,4 +21,4 @@ Clarify requirements. Questions only — never propose solutions.
 
 - Prioritize: blocking ambiguities → costly trade-offs → scope boundaries → missed edge cases → implicit assumptions.
 - Specific, max 5; surface trade-offs and scope boundaries; don't ask what won't change the implementation.
-- Report (workflow-subagent format) — RESULT: clarified requirements / trade-offs / scope in-out. EVIDENCE: user answers. ISSUES: implicit needs.
+- Report (workflow-subagent format) — result: clarified requirements / trade-offs / scope in-out. evidence: user answers. issues: implicit needs.

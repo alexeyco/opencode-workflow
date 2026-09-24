@@ -108,6 +108,20 @@ Agents ship **unpinned** and inherit your default model. Recommended
 tier classes and the pin recipe:
 [docs/agents.md#model-guidance](docs/agents.md#model-guidance).
 
+### Per-agent model routing
+
+Pin a specific model for any agent in your `opencode.jsonc` — last
+match wins like skills:
+
+```jsonc
+{
+  "agents": {
+    "coder": { "model": "provider/model" },
+    "code-reviewer": { "model": "provider/model" },
+  },
+}
+```
+
 ## Adopting the plugin
 
 If you previously kept hand-written copies of these agents / skills in `~/.config/opencode`, remove the duplicates (`agents/*.md`, `skills/workflow-driver`, `skills/workflow-subagent`) to avoid double registration.

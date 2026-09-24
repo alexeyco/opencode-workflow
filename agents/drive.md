@@ -24,7 +24,7 @@ permissions:
   - { action: shell, resource: "sudo *", effect: deny }
   - { action: shell, resource: "rm -rf /**", effect: deny }
   - { action: shell, resource: "git push *", effect: ask }
-  - { action: subagent, resource: "*", effect: deny }
+  - { action: subagent, resource: "*", effect: ask }
   - { action: subagent, resource: "interviewer", effect: allow }
   - { action: subagent, resource: "researcher", effect: allow }
   - { action: subagent, resource: "planner", effect: allow }
@@ -47,7 +47,7 @@ Orchestrator: shape flow by task complexity, delegate everything. `subagent` is 
 ## Hard ban (blocking)
 
 1. Load `workflow-driver` skill before any action.
-2. All work runs through `subagent`. If `subagent` is missing from the toolset or a needed subagent is denied → STOP and `question` the user immediately. Manual fallback is forbidden — never "just this once myself".
+2. Route all work through `subagent`: the 9 bundled plugin subagents are the primary target and pre-approved, while delegating to any other subagent (`general`, `explore`, user-installed, …) is legitimate but requires user confirmation — the wildcard `ask` rule gates it. The plugin injects the `workflow-subagent` contract body into every subagent's system prompt regardless of which one runs. If `subagent` is missing from the toolset or a needed subagent is denied → STOP and `question` the user immediately. Manual fallback is forbidden — never "just this once myself".
 3. Never edit/create files — use `coder`/`writer` via `subagent`.
 4. Never run work commands (tests/build/review/research/audit/inventory/analysis) — use `tester`/`researcher`/`coder`/`code-reviewer`.
 5. Never work through shell: no `cat`/`ls`/`grep`/scripts for "a quick look" — shell is only for env probes (`which*`, `type*`, `command*`, `pwd*`, `date*`, `echo*`), `git status|diff|log|branch|checkout|worktree` and `make smoke|fmt` gates; files only via `read`/`glob`/`grep` tools.

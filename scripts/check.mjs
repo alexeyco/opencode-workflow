@@ -242,7 +242,10 @@ function parseFrontmatter(text) {
       }
     }
 
-    // Each subagent body must reference the workflow-subagent skill
+    // Subagent bodies must NOT mention the workflow-subagent skill: the
+    // contract body is injected into the system prompt by the session hook
+    // and the skill is not loaded on demand. A body mention means a stale
+    // per-file load instruction or format guidance crept back in.
     const SUBAGENTS = REQUIRED_IDS.filter((id) => !PRIMARIES.has(id));
     const offenders = [];
     for (const id of SUBAGENTS) {
@@ -250,13 +253,13 @@ function parseFrontmatter(text) {
       const text = readText(path);
       // Strip frontmatter before checking the body
       const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
-      if (!body.includes("workflow-subagent")) {
+      if (body.includes("workflow-subagent")) {
         offenders.push(id);
       }
     }
     if (offenders.length > 0) {
       fail(
-        `agents: subagent bodies must contain "workflow-subagent", offenders: ${offenders.join(", ")}`,
+        `agents: subagent bodies must not contain "workflow-subagent" (the contract is injected by the hook, not referenced in the body), offenders: ${offenders.join(", ")}`,
       );
     }
 
@@ -288,7 +291,7 @@ function parseFrontmatter(text) {
           );
         }
 
-        // Check for extra ids (outside the expected set, excluding the deny-all rule)
+        // Check for extra ids (outside the expected set, excluding the wildcard rule)
         const extra = [];
         for (const id of allowedIds) {
           if (!expectedIds.has(id)) extra.push(id);
@@ -296,6 +299,19 @@ function parseFrontmatter(text) {
         if (extra.length > 0) {
           fail(
             `agents/drive.md: unexpected subagent allow rules for: ${extra.join(", ")}`,
+          );
+        }
+
+        // The wildcard subagent rule must be "ask" (bundled subagents are
+        // pre-approved; any other target requires user confirmation), not "deny".
+        const wildcard = subagentRules.find((p) => p.resource === "*");
+        if (!wildcard) {
+          fail(
+            `agents/drive.md: must have {subagent, *, ask} (confirmation gate for non-bundled subagents)`,
+          );
+        } else if (wildcard.effect !== "ask") {
+          fail(
+            `agents/drive.md: wildcard subagent rule must be effect "ask", got "${wildcard.effect}"`,
           );
         }
       }

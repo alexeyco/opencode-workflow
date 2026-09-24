@@ -43,18 +43,18 @@ in each `agents/<id>.md`. `—` means no explicit rule — the built-in
 skill and nothing else; every other skill, companion skills included,
 is opt-in via your config tail ([per-role table](skills.md#default-state)).
 
-| Agent           | Read | Edit | Shell                             | Subagents     | Skill                    | Web              |
-| --------------- | ---- | ---- | --------------------------------- | ------------- | ------------------------ | ---------------- |
-| `drive`         | ✓    | ✗    | ask-by-default + narrow allowlist | 9 allowlisted | `workflow-driver` only   | fetch ✓          |
-| `coder`         | ✓    | ✓    | open + guardrails                 | ✗             | `workflow-subagent` only | ✗ fetch + search |
-| `tester`        | ✓    | ✗    | open + guardrails + redirect deny | ✗             | `workflow-subagent` only | ✗ fetch + search |
-| `debugger`      | ✓    | ✗    | allowlist + guardrails            | ✗             | `workflow-subagent` only | ✗ fetch + search |
-| `researcher`    | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | fetch ✓          |
-| `planner`       | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | ✗ fetch + search |
-| `plan-reviewer` | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | ✗ fetch + search |
-| `code-reviewer` | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | ✗ fetch + search |
-| `interviewer`   | ✓    | ✗    | denied                            | ✗             | `workflow-subagent` only | ✗ fetch + search |
-| `writer`        | ✓    | ✓    | ask-by-default + docs allowlist   | ✗             | `workflow-subagent` only | fetch ✓          |
+| Agent           | Read | Edit | Shell                             | Subagents                   | Skill                    | Web              |
+| --------------- | ---- | ---- | --------------------------------- | --------------------------- | ------------------------ | ---------------- |
+| `drive`         | ✓    | ✗    | ask-by-default + narrow allowlist | 9 allowlisted; others → ask | `workflow-driver` only   | fetch ✓          |
+| `coder`         | ✓    | ✓    | open + guardrails                 | ✗                           | `workflow-subagent` only | ✗ fetch + search |
+| `tester`        | ✓    | ✗    | open + guardrails + redirect deny | ✗                           | `workflow-subagent` only | ✗ fetch + search |
+| `debugger`      | ✓    | ✗    | allowlist + guardrails            | ✗                           | `workflow-subagent` only | ✗ fetch + search |
+| `researcher`    | ✓    | ✗    | denied                            | ✗                           | `workflow-subagent` only | fetch ✓          |
+| `planner`       | ✓    | ✗    | denied                            | ✗                           | `workflow-subagent` only | ✗ fetch + search |
+| `plan-reviewer` | ✓    | ✗    | denied                            | ✗                           | `workflow-subagent` only | ✗ fetch + search |
+| `code-reviewer` | ✓    | ✗    | denied                            | ✗                           | `workflow-subagent` only | ✗ fetch + search |
+| `interviewer`   | ✓    | ✗    | denied                            | ✗                           | `workflow-subagent` only | ✗ fetch + search |
+| `writer`        | ✓    | ✓    | ask-by-default + docs allowlist   | ✗                           | `workflow-subagent` only | fetch ✓          |
 
 All agents share `glob` ✓ and `grep` ✓ (explicit or via default);
 `question` ✓ is explicit on `drive` and `interviewer` only. Only the
@@ -78,13 +78,15 @@ work._
   safe git (`git status*`, `git diff*`, `git log*`, `git branch*`,
   `git checkout*`, `git worktree*`), and quality gates (`make smoke*`,
   `make fmt*`). Everything else asks.
-- **Subagent allowlist — exactly the 9 bundled subagents:**
+- **Subagent targets — the 9 bundled subagents are pre-approved:**
   `interviewer`, `researcher`, `planner`, `plan-reviewer`, `coder`,
-  `code-reviewer`, `tester`, `debugger`, `writer`. Everything else is
-  denied.
-- **Skill: `workflow-driver` only**; every subagent must run under
-  `workflow-subagent` — skill defaults and the report format are
-  specified in [docs/skills.md](skills.md#default-state).
+  `code-reviewer`, `tester`, `debugger`, `writer`. The wildcard is
+  `ask`, not `deny`: any other subagent (`general`, `explore`,
+  user-defined) is a legitimate target once the user confirms.
+- **Skill: `workflow-driver` only**; every subagent gets the injected
+  `workflow-subagent` contract body — skill defaults and the report
+  format are specified in
+  [docs/skills.md](skills.md#default-state).
 - **Guardrails:** redirect `**>[^&]**` deny, `sudo *` deny,
   `rm -rf /**` deny, `git push *` ask.
 - `question` ✓, `webfetch` ✓.
@@ -128,9 +130,10 @@ but never modify anything:
 
 All nine subagents share: `subagent` ✗ (no recursive delegation) and a
 strict contract-only `skill` whitelist — the `workflow-subagent` skill
-(required before any action) alone; `drive` mirrors the shape with
-`workflow-driver`. Everything else, companion skills included, needs an
-explicit allow in your config tail — see
+alone, whose contract body the plugin injects into every subagent's
+system prompt ([docs/skills.md](skills.md#enforcement)); `drive` mirrors
+the shape with `workflow-driver`. Everything else, companion skills
+included, needs an explicit allow in your config tail — see
 [docs/skills.md](skills.md#default-state).
 
 ### Shared guardrail matrix

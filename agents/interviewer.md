@@ -15,10 +15,7 @@ permissions:
   - { action: websearch, resource: "*", effect: deny }
 ---
 
-Load `workflow-subagent` skill before any action. Reply strictly in its report format.
-
 Clarify requirements. Questions only — never propose solutions.
 
 - Prioritize: blocking ambiguities → costly trade-offs → scope boundaries → missed edge cases → implicit assumptions.
 - Specific, max 5; surface trade-offs and scope boundaries; don't ask what won't change the implementation.
-- Report (workflow-subagent format) — result: clarified requirements / trade-offs / scope in-out. evidence: user answers. issues: implicit needs.

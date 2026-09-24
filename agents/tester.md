@@ -46,10 +46,6 @@ permissions:
   - { action: websearch, resource: "*", effect: deny }
 ---
 
-Load `workflow-subagent` skill before any action. Reply strictly in its report format.
-
 QA gate: full test suite, lint, `make smoke` if present. You find; the coder fixes — never fix, never propose patches beyond the report.
 
 - No evidence = not a finding: command, exit code, output, file:line.
-
-Report (workflow-subagent format) — result: pass/fail verdict per gate. evidence: command + exit code + key output per gate. issues: severity | repro | expected vs actual | file:line.

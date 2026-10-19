@@ -1,5 +1,9 @@
 # @alexeyco/opencode-workflow
 
+> **Deprecated:** This project is superseded by
+> [oh-my-openspec](https://github.com/alexeyco/oh-my-openspec). Use that
+> project for ongoing development and new installations.
+
 A complete multi-agent engineering team for OpenCode v2 — one orchestrator primary (`drive`), 9 specialized subagents, and two skills (`workflow-driver` + `workflow-subagent`) — in one plugin.
 
 <p align="center">
